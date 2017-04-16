@@ -26,6 +26,21 @@ import resources
 # Import the code for the dialog
 from select_manager_dialog import SelectFromRelationDialog
 import os.path
+from runselectfromrelation import RunSelectFromRelation
+
+"""
+### Original code by Salvatore Larosa###
+
+'''
+QGIS macro to enable selection on referenced geometry layer from
+referencing geometryless table in a Project with Relations.
+How it works:
+1. Enable macros for the QGIS Project
+2. Paste this code in Project->Macro
+3. Save the Project.
+Note: The QGIS project must have relationship between tables.
+See https://goo.gl/w4NMZJ on how to create one-to-many relations.
+'''
 
 from qgis.PyQt.QtCore import QSettings
 from qgis.utils import iface, reloadProjectMacros
@@ -62,7 +77,7 @@ class RunSelectFromRelation:
 
     def closeProject(self):
         pass
-
+"""
 
 class SelectFromRelation:
     """QGIS Plugin Implementation."""
