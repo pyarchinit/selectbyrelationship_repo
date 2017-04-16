@@ -2,6 +2,8 @@ The Qgis plugin allows by a single click on the plugin-button to select records 
 
 Authors: Salvatore Larosa, Salvatore Fiandaca, Andrea Borruso
 
+Original thread: http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html
+
 A first post by Andrea Borruso:
 https://medium.com/tantotanto/qgis-selezionare-geometrie-da-una-tabella-di-attributi-correlata-bea37747a7e2
 
