@@ -9,15 +9,15 @@
 [general]
 name=selectfromrelation
 qgisMinimumVersion=2.0
-description=tihisi a test
+description= The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project.
 version=0.1
-author=larosa, fiandaca, borruso
+author=Salvatore Larosa, Salvatore Fiandaca, Andrea Borruso
 email=test@gmail.com
 
-about=thisi is a beatiful test
+about=
 
-tracker=https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0
-repository=https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0
+tracker=https://github.com/pyarchinit/selectFromRelations/issues
+repository=https://github.com/pyarchinit/selectFromRelations
 # End of mandatory metadata
 
 # Recommended items:
@@ -26,7 +26,7 @@ repository=https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0
 # changelog=
 
 # Tags are comma separated with spaces allowed
-tags=
+tags= relationship, database, selections
 
 homepage=
 category=Database
