@@ -3,11 +3,10 @@
 /***************************************************************************
  SelectFromRelation
                                  A QGIS plugin
- tihisi a test
                               -------------------
         begin                : 2017-04-15
         git sha              : $Format:%H$
-        copyright            : (C) 2017 by larosa, fiandaca, borruso
+        copyright            : (C) 2017 by salvatore Larosa, Salvatore Fiandaca, Andrea Borruso
         email                : test@gmail.com
  ***************************************************************************/
 
@@ -200,7 +199,7 @@ class SelectFromRelation:
         icon_path = ':/plugins/SelectFromRelation/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'click_me'),
+            text=self.tr(u'Allow selections by relationship'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
