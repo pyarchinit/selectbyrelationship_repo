@@ -7,7 +7,7 @@
         begin                : 2017-04-15
         git sha              : $Format:%H$
         copyright            : (C) 2017 by salvatore Larosa, Salvatore Fiandaca, Andrea Borruso
-        email                : test@gmail.com
+        email                : http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html
  ***************************************************************************/
 
 /***************************************************************************
