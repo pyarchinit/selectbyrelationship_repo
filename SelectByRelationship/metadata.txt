@@ -1,0 +1,39 @@
+# This file contains metadata for your plugin. Since 
+# version 2.0 of QGIS this is the proper way to supply 
+# information about a plugin. The old method of 
+# embedding metadata in __init__.py will 
+# is no longer supported since version 2.0.
+
+# This file should be included when you package your plugin.# Mandatory items:
+
+[general]
+name=Select by relationship
+qgisMinimumVersion=2.0
+description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. 
+version=0.1
+author=Luca Mandolesi
+email=pyarchinit@gmail.com
+
+about=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. The plugin button will appear inside Qgis database menu. Anything in 3 steps: 1.Charge in a Qgis project your layers; 2.Set up the relationships between your layers inside the Qgis project properties; 3.Click on selectFromRelations button (or run its from Qgis toolbar Database->Select From Relation -> Allow selections by relationship. Now you can select records between many related tables. You can see an example in this videotutorial by Salvatore Fiandaca: https://www.youtube.com/watch?v=4lXRnsMO-qI The plugin started by an original thread posted by Salvatore Fiandaca and developed by Andrea Borruso and Salvatore Larosa. Original thread: http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html A first post by Andrea Borruso: https://medium.com/tantotanto/qgis-selezionare-geometrie-da-una-tabella-di-attributi-correlata-bea37747a7e2 The original python macro by Salvatore Larosa: https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0 A videotutorial by Salvatore Fiandaca where it's showed the use of python macro by Salvatore Larosa: https://www.youtube.com/watch?v=PRDftcPWNg8 An other videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin: https://www.youtube.com/watch?v=4lXRnsMO-qI
+
+tracker=https://github.com/pyarchinit/selectbyrelationship_repo/issues
+repository=https://github.com/pyarchinit/selectbyrelationship_repo
+# End of mandatory metadata
+
+# Recommended items:
+
+# Uncomment the following line and add your changelog:
+# changelog=
+
+# Tags are comma separated with spaces allowed
+tags=select, relationship, database
+
+homepage=https://github.com/pyarchinit/selectbyrelationship_repo/wiki
+category=Database
+icon=icon.png
+# experimental flag
+experimental=True
+
+# deprecated flag (applies to the whole plugin, not just a single version)
+deprecated=False
+
