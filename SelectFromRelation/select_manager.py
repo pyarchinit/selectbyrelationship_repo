@@ -164,7 +164,7 @@ class SelectFromRelation:
         icon_path = ':/plugins/SelectFromRelation/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Allow selections by relationship'),
+            text=self.tr(u'Allows selections by relationship'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -182,7 +182,7 @@ class SelectFromRelation:
 
     def run(self):
         """Run method that performs all the real work"""
-        # show the dialog
+        # class  RunSelectFromRelation instane
         sFr = RunSelectFromRelation()
         # Run the dialog event loop
         sFr.openProject()

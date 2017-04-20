@@ -13,7 +13,7 @@ See https://goo.gl/w4NMZJ on how to create one-to-many relations.
 '''
 
 from qgis.PyQt.QtCore import QSettings
-from PyQt4.QtGui import *
+
 from qgis.utils import iface, reloadProjectMacros
 from qgis.core import QgsFeatureRequest, QgsProject
 from functools import partial
