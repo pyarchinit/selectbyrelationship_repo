@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
- SelectFromRelation
+ SelectByRelationship
                                  A QGIS plugin
+ The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. 
                               -------------------
-        begin                : 2017-04-15
+        begin                : 2017-04-20
         git sha              : $Format:%H$
-        copyright            : (C) 2017 by salvatore Larosa, Salvatore Fiandaca, Andrea Borruso
-        email                : http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html
+        copyright            : (C) 2017 by Luca Mandolesi
+        email                : pyarchinit@gmail.com
  ***************************************************************************/
 
 /***************************************************************************
@@ -24,12 +25,11 @@ from PyQt4.QtGui import QAction, QIcon
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
-from select_manager_dialog import SelectFromRelationDialog
+from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 import os.path
-from runselectfromrelation import RunSelectFromRelation
 
 
-class SelectFromRelation:
+class SelectByRelationship:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -49,7 +49,7 @@ class SelectFromRelation:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'SelectFromRelation_{}.qm'.format(locale))
+            'SelectByRelationship_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -61,10 +61,10 @@ class SelectFromRelation:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&selectfromrelation')
+        self.menu = self.tr(u'&Select by relationship')
         # TODO: We are going to let the user set this up in a future iteration
-        self.toolbar = self.iface.addToolBar(u'SelectFromRelation')
-        self.toolbar.setObjectName(u'SelectFromRelation')
+        self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
+        self.toolbar.setObjectName(u'SelectByRelationship')
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -79,7 +79,7 @@ class SelectFromRelation:
         :rtype: QString
         """
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('SelectFromRelation', message)
+        return QCoreApplication.translate('SelectByRelationship', message)
 
 
     def add_action(
@@ -133,7 +133,7 @@ class SelectFromRelation:
         """
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = SelectFromRelationDialog()
+        self.dlg = SelectByRelationshipDialog()
 
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
@@ -161,10 +161,10 @@ class SelectFromRelation:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/SelectFromRelation/icon.png'
+        icon_path = ':/plugins/SelectByRelationship/icon.png'
         self.add_action(
             icon_path,
-            text=self.tr(u'Allow selections by relationship'),
+            text=self.tr(u'Allows selections by relationship'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -173,7 +173,7 @@ class SelectFromRelation:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginDatabaseMenu(
-                self.tr(u'&selectfromrelation'),
+                self.tr(u'&Select by relationship'),
                 action)
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
@@ -183,11 +183,11 @@ class SelectFromRelation:
     def run(self):
         """Run method that performs all the real work"""
         # show the dialog
-        sFr = RunSelectFromRelation()
+        self.dlg.show()
         # Run the dialog event loop
-        sFr.openProject()
-        sFr.saveProject()
-    
-    
-    
-
+        result = self.dlg.exec_()
+        # See if OK was pressed
+        if result:
+            # Do something useful here - delete the line containing pass and
+            # substitute with your code.
+            pass

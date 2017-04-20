@@ -27,6 +27,7 @@ import resources
 # Import the code for the dialog
 from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 import os.path
+from runselectbyrelationship import RunSelectbyRelationship
 
 
 class SelectByRelationship:
@@ -179,15 +180,10 @@ class SelectByRelationship:
         # remove the toolbar
         del self.toolbar
 
-
     def run(self):
         """Run method that performs all the real work"""
-        # show the dialog
-        self.dlg.show()
+        # class  RunSelectFromRelation instane
+        sFr = RunSelectbyRelationship()
         # Run the dialog event loop
-        result = self.dlg.exec_()
-        # See if OK was pressed
-        if result:
-            # Do something useful here - delete the line containing pass and
-            # substitute with your code.
-            pass
+        sFr.openProject()
+        sFr.saveProject()

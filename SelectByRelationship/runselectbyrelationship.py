@@ -3,7 +3,7 @@
 
 '''
 QGIS macro to enable selection on referenced geometry layer from
-referencing geometryless table in a Project with Relations.
+referencing geometries table in a Project with Relations.
 How it works:
 1. Enable macros for the QGIS Project
 2. Paste this code in Project->Macro
@@ -18,7 +18,7 @@ from qgis.utils import iface, reloadProjectMacros
 from qgis.core import QgsFeatureRequest, QgsProject
 from functools import partial
 
-class RunSelectFromRelation(QDialog):
+class RunSelectbyRelationship(QDialog):
     s = QSettings()
     s.setValue("qgis/enableMacros", 3)
 
