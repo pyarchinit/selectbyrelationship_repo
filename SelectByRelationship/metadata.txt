@@ -30,7 +30,7 @@ tags=select, relationship, database
 
 homepage=https://github.com/pyarchinit/selectbyrelationship_repo/wiki
 category=Database
-icon=icon.png
+icon=icon.svg
 # experimental flag
 experimental=True
 
