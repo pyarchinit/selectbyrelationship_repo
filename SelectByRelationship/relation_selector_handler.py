@@ -27,14 +27,12 @@ __revision__ = '$Format:%H$'
 
 # from functools import partial
 
-from qgis.core import *
-from qgis.utils import iface
-
 from PyQt4.QtCore import QObject
+from qgis.core import QgsFeatureRequest, QgsProject
 
 
 class RelationSelector(QObject):
-    def __init__(self, manager, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, iface, activeReferencedLayer=False, zoomReferencedFeature=False):
         """
         Class to handle selection between layer relationships
 
@@ -60,8 +58,10 @@ class RelationSelector(QObject):
         :type zoomReferencedFeature: bool
         """
         super(RelationSelector, self).__init__()
+        self.iface = iface
 
-        self.manager = manager
+        # self.manager = manager
+        self.manager = QgsProject.instance().relationManager()
         self.manager.changed.connect(self.relationsChanged)
 
         self.relations = self.manager.relations()
@@ -73,11 +73,11 @@ class RelationSelector(QObject):
 
         # self.connectChildRelations()
 
-        self.mc = iface.mapCanvas()
+        self.mc = self.iface.mapCanvas()
 
     def active(self):
         if len(self.relations) == 0:
-            iface.messageBar().pushMessage("No relationship set in Project properties", 1)
+            self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             self.deactive()
             return False
         self.connectChildRelations()
@@ -85,7 +85,7 @@ class RelationSelector(QObject):
 
     def deactive(self):
         self.disconnectRelations()
-        # self.manager.changed.disconnect(self.relationsChanged)
+        self.manager.changed.disconnect(self.relationsChanged)
         # self.manager.clear()
         # for id, rl in self.relationsBackup.iteritems():
         #     rl.referencingLayer()
@@ -122,7 +122,7 @@ class RelationSelector(QObject):
         self.zoomToReferencedLayerSelection = value
 
     def relationsChanged(self):
-        iface.messageBar().pushMessage('changed', 0)
+        self.iface.messageBar().pushMessage('changed', 0)
         if len(self.relationsBuffer) >= len(self.relations):
             self.disconnectRelations()
             self.relations = self.manager.relations()

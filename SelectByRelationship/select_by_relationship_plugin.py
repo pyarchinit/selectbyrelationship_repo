@@ -3,7 +3,8 @@
 /***************************************************************************
  SelectByRelationship
                                  A QGIS plugin
- The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. 
+ The plugin allows to select records through tables based on relationships
+ one-to-one or one-to-many specified inside a Qgis project.
                               -------------------
         begin                : 2017-04-20
         git sha              : $Format:%H$
@@ -69,7 +70,7 @@ class SelectByRelationship:
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
         self.toolbar.setObjectName(u'SelectByRelationship')
 
-        self.manager = QgsProject.instance().relationManager()
+        # self.manager = QgsProject.instance().relationManager()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -192,12 +193,13 @@ class SelectByRelationship:
         """Run method that performs all the real work"""
         # class  RunSelectFromRelation instane
         # self.debug_trace()
-        sFr = RelationSelector(self.manager)
+        sFr = RelationSelector(self.iface)
 
         if toggle:
             sFr.zoomParentFeature = True
-            # sFr.selectChildFromParent = True
-            self.actionRelations.setChecked(sFr.active())
+            sFr.selectChildFromParent = True
+            sFr.active()
+            # self.actionRelations.setChecked(sFr.active())
         else:
             print 'deactived'
             sFr.deactive()
@@ -205,7 +207,7 @@ class SelectByRelationship:
             # Run the dialog event loop
 
     def debug_trace(self):
-        '''Set a tracepoint in the Python debugger that works with Qt'''
+        """Set a tracepoint in the Python debugger that works with Qt"""
 
         from PyQt4.QtCore import pyqtRemoveInputHook
         # Or for Qt5
