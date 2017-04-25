@@ -32,7 +32,7 @@ from qgis.core import QgsFeatureRequest, QgsProject
 
 
 class RelationSelector(QObject):
-    def __init__(self, iface, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, iface, manager, activeReferencedLayer=False, zoomReferencedFeature=False):
         """
         Class to handle selection between layer relationships
 
@@ -57,12 +57,11 @@ class RelationSelector(QObject):
         :param zoomReferencedFeature: whether or not zooming layer on selection
         :type zoomReferencedFeature: bool
         """
-        super(RelationSelector, self).__init__()
+        super(RelationSelector, self).__init__(manager)
         self.iface = iface
 
-        # self.manager = manager
-        self.manager = QgsProject.instance().relationManager()
-        self.manager.changed.connect(self.relationsChanged)
+        self.manager = manager
+        # self.manager.changed.connect(self.relationsChanged)
 
         self.relations = self.manager.relations()
         self.relationsBuffer = self.relationsBackup = self.relations
@@ -85,7 +84,7 @@ class RelationSelector(QObject):
 
     def deactive(self):
         self.disconnectRelations()
-        self.manager.changed.disconnect(self.relationsChanged)
+        # self.manager.changed.disconnect(self.relationsChanged)
         # self.manager.clear()
         # for id, rl in self.relationsBackup.iteritems():
         #     rl.referencingLayer()
@@ -182,18 +181,19 @@ class RelationSelector(QObject):
         referencingLayer.triggerRepaint()
 
     def selectChildsFromParent(self, fids):
-        rl = self.manager.referencedRelations(self.sender())[0]
-        referencingLayer = rl.referencingLayer()
-        referencedLayer = rl.referencedLayer()
+        rls = self.manager.referencedRelations(self.sender())
+        for rl in rls:
+            referencingLayer = rl.referencingLayer()
+            referencedLayer = rl.referencedLayer()
 
-        request = QgsFeatureRequest().setFilterFids(fids)
-        f = next(referencedLayer.getFeatures(request))
-        it = rl.getRelatedFeatures(f)
-        childIds = [i.id() for i in it]
+            request = QgsFeatureRequest().setFilterFids(fids)
+            f = next(referencedLayer.getFeatures(request))
+            it = rl.getRelatedFeatures(f)
+            childIds = [i.id() for i in it]
 
-        referencedLayer.blockSignals(True)
-        referencingLayer.setSelectedFeatures(childIds)
-        referencedLayer.blockSignals(False)
+            referencedLayer.blockSignals(True)
+            referencingLayer.setSelectedFeatures(childIds)
+            referencedLayer.blockSignals(False)
 
-        referencedLayer.triggerRepaint()
-        referencingLayer.triggerRepaint()
+            referencedLayer.triggerRepaint()
+            referencingLayer.triggerRepaint()

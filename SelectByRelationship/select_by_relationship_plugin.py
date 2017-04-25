@@ -70,7 +70,7 @@ class SelectByRelationship:
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
         self.toolbar.setObjectName(u'SelectByRelationship')
 
-        # self.manager = QgsProject.instance().relationManager()
+        self.manager = QgsProject.instance().relationManager()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -193,13 +193,13 @@ class SelectByRelationship:
         """Run method that performs all the real work"""
         # class  RunSelectFromRelation instane
         # self.debug_trace()
-        sFr = RelationSelector(self.iface)
+        sFr = RelationSelector(self.iface, self.manager)
 
         if toggle:
             sFr.zoomParentFeature = True
             sFr.selectChildFromParent = True
-            sFr.active()
-            # self.actionRelations.setChecked(sFr.active())
+            # sFr.active()
+            self.actionRelations.setChecked(sFr.active())
         else:
             print 'deactived'
             sFr.deactive()
