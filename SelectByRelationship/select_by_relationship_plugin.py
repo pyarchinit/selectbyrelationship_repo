@@ -20,14 +20,17 @@
  *                                                                         *
  ***************************************************************************/
 """
+
+from qgis.core import *
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
+
 # Initialize Qt resources from file resources.py
 import resources
 # Import the code for the dialog
 from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 import os.path
-from runselectbyrelationship import RunSelectbyRelationship
+from relation_selector_handler import RelationSelector
 
 
 class SelectByRelationship:
@@ -59,13 +62,14 @@ class SelectByRelationship:
             if qVersion() > '4.3.3':
                 QCoreApplication.installTranslator(self.translator)
 
-
         # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Select by relationship')
         # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
         self.toolbar.setObjectName(u'SelectByRelationship')
+
+        self.manager = QgsProject.instance().relationManager()
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -82,18 +86,18 @@ class SelectByRelationship:
         # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
         return QCoreApplication.translate('SelectByRelationship', message)
 
-
     def add_action(
-        self,
-        icon_path,
-        text,
-        callback,
-        enabled_flag=True,
-        add_to_menu=True,
-        add_to_toolbar=True,
-        status_tip=None,
-        whats_this=None,
-        parent=None):
+            self,
+            icon_path,
+            text,
+            callback,
+            checkable=False,
+            enabled_flag=True,
+            add_to_menu=True,
+            add_to_toolbar=True,
+            status_tip=None,
+            whats_this=None,
+            parent=None):
         """Add a toolbar icon to the toolbar.
 
         :param icon_path: Path to the icon for this action. Can be a resource
@@ -138,8 +142,12 @@ class SelectByRelationship:
 
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
-        action.triggered.connect(callback)
+        if checkable:
+            action.toggled.connect(callback)
+        else:
+            action.triggered.connect(callback)
         action.setEnabled(enabled_flag)
+        action.setCheckable(checkable)
 
         if status_tip is not None:
             action.setStatusTip(status_tip)
@@ -163,12 +171,12 @@ class SelectByRelationship:
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
         icon_path = ':/plugins/SelectByRelationship/icon.svg'
-        self.add_action(
+        self.actionRelations = self.add_action(
             icon_path,
             text=self.tr(u'Allows selections by relationship'),
+            checkable=True,
             callback=self.run,
             parent=self.iface.mainWindow())
-
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
@@ -180,10 +188,28 @@ class SelectByRelationship:
         # remove the toolbar
         del self.toolbar
 
-    def run(self):
+    def run(self, toggle):
         """Run method that performs all the real work"""
         # class  RunSelectFromRelation instane
-        sFr = RunSelectbyRelationship()
-        # Run the dialog event loop
-        sFr.openProject()
-        sFr.saveProject()
+        # self.debug_trace()
+        sFr = RelationSelector(self.manager)
+
+        if toggle:
+            sFr.zoomParentFeature = True
+            # sFr.selectChildFromParent = True
+            self.actionRelations.setChecked(sFr.active())
+        else:
+            print 'deactived'
+            sFr.deactive()
+            # sFr.connectChildRelations()
+            # Run the dialog event loop
+
+    def debug_trace(self):
+        '''Set a tracepoint in the Python debugger that works with Qt'''
+
+        from PyQt4.QtCore import pyqtRemoveInputHook
+        # Or for Qt5
+        # from PyQt5.QtCore import pyqtRemoveInputHook
+        from pdb import set_trace
+        pyqtRemoveInputHook()
+        set_trace()
