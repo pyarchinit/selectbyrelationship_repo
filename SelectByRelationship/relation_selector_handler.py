@@ -32,12 +32,12 @@ from qgis.core import QgsFeatureRequest, QgsProject
 
 
 class RelationSelector(QObject):
-    def __init__(self, iface, manager, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, iface, activeReferencedLayer=False, zoomReferencedFeature=False):
         """
         Class to handle selection between layer relationships
 
         Usage:
-        >>> RS = RelationSelector()
+        >>> RS = RelationSelector(iface)
         >>> # switching to parent layer by selecting a row on child layer
         >>> RS.activeParentLayer = True
         >>> # zoom to parent feature by selecting a row on child layer
@@ -45,11 +45,8 @@ class RelationSelector(QObject):
         >>> # select childs from parent layer
         >>> RS.selectChildFromParent = True
 
-        IMPORTANT in order to avoid crashing:
-        >>> RS.clear()
-
         You can initializing properties directly from constructor as well
-        >>> RS = RelationSelector(activeReferencedLayer=True, zoomReferencedFeature=False)
+        >>> RS = RelationSelector(iface, activeReferencedLayer=True, zoomReferencedFeature=False)
 
         :param activeReferencedLayer: whether or not activing layer on selection
         :type activeReferencedLayer: bool
@@ -57,11 +54,12 @@ class RelationSelector(QObject):
         :param zoomReferencedFeature: whether or not zooming layer on selection
         :type zoomReferencedFeature: bool
         """
-        super(RelationSelector, self).__init__(manager)
+        super(RelationSelector, self).__init__(iface)
         self.iface = iface
 
-        self.manager = manager
-        # self.manager.changed.connect(self.relationsChanged)
+        self.manager = QgsProject.instance().relationManager()
+        self.manager.changed.connect(self.relationsChanged)
+        self.destroyed.connect(self.deactive)
 
         self.relations = self.manager.relations()
         self.relationsBuffer = self.relationsBackup = self.relations
@@ -84,12 +82,8 @@ class RelationSelector(QObject):
 
     def deactive(self):
         self.disconnectRelations()
-        # self.manager.changed.disconnect(self.relationsChanged)
-        # self.manager.clear()
-        # for id, rl in self.relationsBackup.iteritems():
-        #     rl.referencingLayer()
-        #     rl.referencedLayer()
-        # self.manager.addRelation(rl)
+        self.manager.changed.disconnect(self.relationsChanged)
+        self.deleteLater()
 
     def clear(self):
         self.manager.clear()
