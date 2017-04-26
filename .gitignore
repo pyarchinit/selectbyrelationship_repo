@@ -120,10 +120,8 @@ ENV/
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff:
-.idea/workspace.xml
 .idea/tasks.xml
 .idea/dictionaries
-.idea/vcs.xml
 .idea/jsLibraryMappings.xml
 
 # Sensitive or high-churn files:
@@ -161,10 +159,4 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-.DS_Store
-.gitignore
-.idea/misc.xml
-.idea/modules.xml
-.idea/selectbyrelationship_repo.iml
-.idea/markdown-navigator.xml
-.idea/markdown-navigator/
+.idea
