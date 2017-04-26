@@ -22,7 +22,6 @@
  ***************************************************************************/
 """
 
-from qgis.core import *
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
 from PyQt4.QtGui import QAction, QIcon
 
@@ -191,7 +190,6 @@ class SelectByRelationship:
 
     def run(self, toggle):
         """Run method that performs all the real work"""
-        # class  RunSelectFromRelation instane
         # self.debug_trace()
         if toggle:
             self.sFr = QgsRelationSelector(self.iface)
@@ -204,7 +202,6 @@ class SelectByRelationship:
             if self.sFr:
                 print 'sFr being deleted'
                 self.sFr.deactive()
-            # Run the dialog event loop
 
     def debug_trace(self):
         """Set a tracepoint in the Python debugger that works with Qt"""

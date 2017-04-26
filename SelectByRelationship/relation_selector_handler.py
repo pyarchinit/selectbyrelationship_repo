@@ -25,8 +25,6 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 
 __revision__ = '$Format:%H$'
 
-# from functools import partial
-
 from PyQt4.QtCore import QObject
 from qgis.core import QgsFeatureRequest, QgsProject
 
@@ -63,7 +61,6 @@ class QgsRelationSelector(QObject):
 
         self.manager = QgsProject.instance().relationManager()
         self.manager.changed.connect(self.relationsChanged)
-        self.destroyed.connect(self.deactive)
 
         self.relations = self.manager.relations()
         self.relationsBuffer = self.relationsBackup = self.relations
@@ -72,21 +69,19 @@ class QgsRelationSelector(QObject):
         self.zoomParentFeature = zoomReferencedFeature
         self.selectChildFromParent = False
 
-        # self.connectChildRelations()
-
         self.mc = self.iface.mapCanvas()
 
     def active(self):
         if len(self.relations) == 0:
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
-            self.deactive()
             return False
         self.connectChildRelations()
         return True
 
     def deactive(self):
         self.disconnectRelations()
-        self.manager.changed.disconnect(self.relationsChanged)
+        if self.manager:
+            self.manager.changed.disconnect(self.relationsChanged)
         self.deleteLater()
 
     def clear(self):
