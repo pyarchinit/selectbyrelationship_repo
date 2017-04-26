@@ -1,10 +1,14 @@
 # ![logo](icon.png) Select by Relationship
 
-The Qgis plugin allows by a single click on the plugin-button to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project.
+The QGIS plugin allows by a single click on the plugin-button to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project.
 
-Authors: [Salvatore Larosa](), [Salvatore Fiandaca](), [Andrea Borruso]()
+Authors: [Luca Mandolesi](https://github.com/pyarchinit), [Salvatore Larosa](https://github.com/slarosa)
 
-[Original thread](http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html)
+Collaborators: [Andrea Borruso](https://github.com/aborruso), [Salvatore Fiandaca](https://github.com/pigreco)
+
+This plugin has an awesome history:
+
+[Original thread (it)](http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html)
 
 [A first post by Andrea Borruso](https://medium.com/tantotanto/qgis-selezionare-geometrie-da-una-tabella-di-attributi-correlata-bea37747a7e2)
 
