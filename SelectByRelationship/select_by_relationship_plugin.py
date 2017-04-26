@@ -31,7 +31,7 @@ import resources
 # Import the code for the dialog
 from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 import os.path
-from relation_selector_handler import RelationSelector
+from relation_selector_handler import QgsRelationSelector
 
 
 class SelectByRelationship:
@@ -194,7 +194,7 @@ class SelectByRelationship:
         # class  RunSelectFromRelation instane
         # self.debug_trace()
         if toggle:
-            self.sFr = RelationSelector(self.iface)
+            self.sFr = QgsRelationSelector(self.iface)
             # self.sFr.zoomParentFeature = True
             # self.sFr.selectChildFromParent = True
             # self.sFr.activeParentLayer = True

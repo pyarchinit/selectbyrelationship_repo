@@ -31,30 +31,34 @@ from PyQt4.QtCore import QObject
 from qgis.core import QgsFeatureRequest, QgsProject
 
 
-class RelationSelector(QObject):
+class QgsRelationSelector(QObject):
     def __init__(self, iface, activeReferencedLayer=False, zoomReferencedFeature=False):
         """
         Class to handle selection between layer relationships
 
         Usage:
-        >>> RS = RelationSelector(iface)
-        >>> # switching to parent layer by selecting a row on child layer
+        >>> RS = QgsRelationSelector(iface)
+        # switching to parent layer by selecting a row on child layer
         >>> RS.activeParentLayer = True
-        >>> # zoom to parent feature by selecting a row on child layer
+        # zoom to parent feature by selecting a row on child layer
         >>> RS.zoomParentFeature = True
-        >>> # select childs from parent layer
+        # select childs from parent layer
         >>> RS.selectChildFromParent = True
+        # to enable selection for relationships
+        >>> RS.active()
+        # to disable selection for relationships
+        >>> RS.deactive()
 
         You can initializing properties directly from constructor as well
-        >>> RS = RelationSelector(iface, activeReferencedLayer=True, zoomReferencedFeature=False)
+        >>> RS = QgsRelationSelector(iface, activeReferencedLayer=True, zoomReferencedFeature=False)
 
+        :param iface: QgisInterface object
         :param activeReferencedLayer: whether or not activing layer on selection
         :type activeReferencedLayer: bool
-
         :param zoomReferencedFeature: whether or not zooming layer on selection
         :type zoomReferencedFeature: bool
         """
-        super(RelationSelector, self).__init__(iface)
+        super(QgsRelationSelector, self).__init__(iface)
         self.iface = iface
 
         self.manager = QgsProject.instance().relationManager()
