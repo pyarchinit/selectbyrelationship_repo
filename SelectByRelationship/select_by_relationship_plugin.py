@@ -196,12 +196,10 @@ class SelectByRelationship:
             # self.sFr.zoomParentFeature = True
             # self.sFr.selectChildFromParent = True
             # self.sFr.activeParentLayer = True
-            self.actionRelations.setChecked(self.sFr.active())
+            self.actionRelations.setChecked(self.sFr.enable())
         else:
-            print 'deactived'
             if self.sFr:
-                print 'sFr being deleted'
-                self.sFr.deactive()
+                self.sFr.disable()
 
     def debug_trace(self):
         """Set a tracepoint in the Python debugger that works with Qt"""

@@ -43,9 +43,9 @@ class QgsRelationSelector(QObject):
         # select childs from parent layer
         >>> RS.selectChildFromParent = True
         # to enable selection for relationships
-        >>> RS.active()
+        >>> RS.enable()
         # to disable selection for relationships
-        >>> RS.deactive()
+        >>> RS.disable()
 
         You can initializing properties directly from constructor as well
         >>> RS = QgsRelationSelector(iface, activeReferencedLayer=True, zoomReferencedFeature=False)
@@ -71,14 +71,14 @@ class QgsRelationSelector(QObject):
 
         self.mc = self.iface.mapCanvas()
 
-    def active(self):
+    def enable(self):
         if len(self.relations) == 0:
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             return False
         self.connectChildRelations()
         return True
 
-    def deactive(self):
+    def disable(self):
         self.disconnectRelations()
         if self.manager:
             self.manager.changed.disconnect(self.relationsChanged)
