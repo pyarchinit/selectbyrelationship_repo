@@ -23,7 +23,7 @@ class RunSelectbyRelationship(QDialog):
     s.setValue("qgis/enableMacros", 3)
 
     def openProject(self):
-        def selectionChangedChild(rl, fts):
+        """def selectionChangedChild(rl, fts):
             referencingLayer = rl.referencingLayer()
             referencedLayer = rl.referencedLayer()
 
@@ -34,9 +34,9 @@ class RunSelectbyRelationship(QDialog):
                 ids.append(rl.getReferencedFeature(f).id())
 
             referencedLayer.setSelectedFeatures(ids)
-            iface.setActiveLayer(referencedLayer)
+            iface.setActiveLayer(referencedLayer)"""
 
-        """def selectionChangedParent(rl, fts):
+        def selectionChangedParent(rl, fts):
             referencingLayer = rl.referencingLayer()
             referencedLayer = rl.referencedLayer()
 
@@ -47,7 +47,7 @@ class RunSelectbyRelationship(QDialog):
                 ids.append(rl.getReferencedFeature(f).id())
 
             referencingLayer.setSelectedFeatures(ids)
-            iface.setActiveLayer(referencingLayer)"""
+            iface.setActiveLayer(referencingLayer)
 
         rM = QgsProject.instance().relationManager()
         rls = rM.relations()
@@ -55,13 +55,13 @@ class RunSelectbyRelationship(QDialog):
         if bool(rls) != True:
             QMessageBox.warning(self, "Warning", "No relationship set in Project properties",  QMessageBox.Ok)
         else:
-            for rlid, rl in rls.iteritems():
+            """for rlid, rl in rls.iteritems():
                 referencingLayer = rl.referencingLayer()
-                referencingLayer.selectionChanged.connect(partial(selectionChangedChild, rl))
-            """#create link for parent to child
+                referencingLayer.selectionChanged.connect(partial(selectionChangedChild, rl))"""
+            #create link for parent to child
             for rlid, rl in rls.iteritems():
                 referencedLayer = rl.referencedLayer()
-                referencedLayer.selectionChanged.connect(partial(selectionChangedParent, rl))"""
+                referencedLayer.selectionChanged.connect(partial(selectionChangedParent, rl))
 
 
     def saveProject(self):
