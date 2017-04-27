@@ -187,9 +187,11 @@ class QgsRelationSelector(QObject):
             referencedLayer = rl.referencedLayer()
 
             request = QgsFeatureRequest().setFilterFids(fids)
-            f = next(referencedLayer.getFeatures(request))
-            it = rl.getRelatedFeatures(f)
-            childIds = [i.id() for i in it]
+            fit = referencedLayer.getFeatures(request)
+            childIds = []
+            for f in fit:
+                it = rl.getRelatedFeatures(f)
+                childIds.extend([i.id() for i in it])
 
             referencedLayer.blockSignals(True)
             referencingLayer.setSelectedFeatures(childIds)
