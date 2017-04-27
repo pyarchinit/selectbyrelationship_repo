@@ -165,7 +165,7 @@ class QgsRelationSelector(QObject):
         referencingLayer.blockSignals(False)
 
         if self.activeReferencedLayerOnSelection:
-            iface.setActiveLayer(referencedLayer)
+            self.iface.setActiveLayer(referencedLayer)
 
         if self.zoomToReferencedLayerSelection:
             self.mc.zoomToSelected(referencedLayer)
