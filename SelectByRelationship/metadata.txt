@@ -10,11 +10,11 @@
 name=Select by relationship
 qgisMinimumVersion=2.0
 description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. 
-version=0.1
-author=Luca Mandolesi
+version=0.2
+author=Luca Mandolesi, Salvatore Larosa
 email=pyarchinit@gmail.com
 
-about=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. The plugin button will appear inside Qgis database menu. Anything in 3 steps: 1.Charge in a Qgis project your layers; 2.Set up the relationships between your layers inside the Qgis project properties; 3.Click on selectFromRelations button (or run its from Qgis toolbar Database->Select From Relation -> Allow selections by relationship. Now you can select records between many related tables. You can see an example in this videotutorial by Salvatore Fiandaca: https://www.youtube.com/watch?v=4lXRnsMO-qI The plugin started by an original thread posted by Salvatore Fiandaca and developed by Andrea Borruso and Salvatore Larosa. Original thread: http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html A first post by Andrea Borruso: https://medium.com/tantotanto/qgis-selezionare-geometrie-da-una-tabella-di-attributi-correlata-bea37747a7e2 The original python macro by Salvatore Larosa: https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0 A videotutorial by Salvatore Fiandaca where it's showed the use of python macro by Salvatore Larosa: https://www.youtube.com/watch?v=PRDftcPWNg8 An other videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin: https://www.youtube.com/watch?v=4lXRnsMO-qI
+about=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.<br>The plugin button will appear inside Qgis database menu. Anything in 3 steps:<br>1.Charge in a Qgis project your layers;<br>2.Set up the relationships between your layers inside the Qgis project properties;<br>3.Click on selectFromRelations button (or run its from Qgis toolbar Database->Select From Relation -> Allow selections by relationship.<br><br>Now you can select records between many related tables.<br>You can see an example in this videotutorial by Salvatore Fiandaca: <a href="https://www.youtube.com/watch?v=4lXRnsMO-qI">link</a><br>The plugin started by an original thread posted by Salvatore Fiandaca and developed by Andrea Borruso and Salvatore Larosa: <a href="http://osgeo-org.1560.x6.nabble.com/QGIS-select-in-join-tabella-in-relazione-td5317093.html">Original thread</a><br>A first post by Andrea Borruso: <a href="https://medium.com/tantotanto/qgis-selezionare-geometrie-da-una-tabella-di-attributi-correlata-bea37747a7e2">link</a><br>The original python macro by Salvatore Larosa: <a href="https://gist.github.com/slarosa/653e6d759cf0d82c2a24dcc499b094e0">link</a><br>A videotutorial by Salvatore Fiandaca where it's showed the use of python macro by Salvatore Larosa: <a href="https://www.youtube.com/watch?v=PRDftcPWNg8">link</a><br>An other videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin: <a href="https://www.youtube.com/watch?v=4lXRnsMO-qI">link</a>
 
 tracker=https://github.com/pyarchinit/selectbyrelationship_repo/issues
 repository=https://github.com/pyarchinit/selectbyrelationship_repo
@@ -23,14 +23,14 @@ repository=https://github.com/pyarchinit/selectbyrelationship_repo
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-# changelog=
+changelog=New in version 0.2:<br>Support for selecting childs from parent relation
 
 # Tags are comma separated with spaces allowed
 tags=select, relationship, database
 
 homepage=https://github.com/pyarchinit/selectbyrelationship_repo/wiki
 category=Database
-icon=icon.png
+icon=icon.svg
 # experimental flag
 experimental=True
 
