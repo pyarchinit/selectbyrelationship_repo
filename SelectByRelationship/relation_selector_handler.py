@@ -114,7 +114,7 @@ class QgsRelationSelector(QObject):
         self.zoomToReferencedLayerSelection = value
 
     def relationsChanged(self):
-        self.iface.messageBar().pushMessage('changed', 0)
+        # self.iface.messageBar().pushMessage('changed', 0)
         if len(self.relationsBuffer) >= len(self.relations):
             self.disconnectRelations()
             self.relations = self.manager.relations()
