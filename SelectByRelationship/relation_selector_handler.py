@@ -142,10 +142,8 @@ class QgsRelationSelector(QObject):
                     pass
 
     def connectChildRelations(self):
-        print self.relations
         for _, rl in self.relations.iteritems():
             referencingLayer = rl.referencingLayer()
-            print referencingLayer.name()
             referencingLayer.selectionChanged.connect(self.selectParentFromChilds)
 
     def disconnectRelations(self):
