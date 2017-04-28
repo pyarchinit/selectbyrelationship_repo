@@ -23,6 +23,7 @@
 """
 
 import os.path
+import resources
 
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
 from PyQt4.QtGui import QAction, QIcon
