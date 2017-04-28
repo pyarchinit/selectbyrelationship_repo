@@ -22,7 +22,7 @@
  ***************************************************************************/
 """
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication
+from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
 from PyQt4.QtGui import QAction, QIcon
 
 # Initialize Qt resources from file resources.py
@@ -33,8 +33,9 @@ import os.path
 from relation_selector_handler import QgsRelationSelector
 
 
-class SelectByRelationship:
+class SelectByRelationship(QObject):
     """QGIS Plugin Implementation."""
+    buttonToggled = pyqtSignal(bool)
 
     def __init__(self, iface):
         """Constructor.
@@ -45,6 +46,7 @@ class SelectByRelationship:
         :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
+        QObject.__init__(self, iface)
         self.iface = iface
         # initialize plugin directory
         self.plugin_dir = os.path.dirname(__file__)
@@ -70,6 +72,7 @@ class SelectByRelationship:
         self.toolbar.setObjectName(u'SelectByRelationship')
 
         self.sFr = None
+        self.buttonToggled.connect(self.toggleButton)
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):
@@ -188,15 +191,21 @@ class SelectByRelationship:
         # remove the toolbar
         del self.toolbar
 
+    @pyqtSlot(bool)
+    def toggleButton(self, toggled):
+        self.actionRelations.setChecked(toggled)
+
     def run(self, toggle):
         """Run method that performs all the real work"""
         # self.debug_trace()
         if toggle:
-            self.sFr = QgsRelationSelector(self.iface)
+            self.sFr = QgsRelationSelector(self)
             # self.sFr.zoomParentFeature = True
             # self.sFr.selectChildFromParent = True
             # self.sFr.activeParentLayer = True
-            self.actionRelations.setChecked(self.sFr.enable())
+            ok = self.sFr.enable()
+            if not ok:
+                self.buttonToggled.emit(False)
         else:
             if self.sFr:
                 self.sFr.disable()
