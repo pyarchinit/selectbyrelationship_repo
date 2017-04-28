@@ -142,8 +142,10 @@ class QgsRelationSelector(QObject):
                     pass
 
     def connectChildRelations(self):
+        print self.relations
         for _, rl in self.relations.iteritems():
             referencingLayer = rl.referencingLayer()
+            print referencingLayer.name()
             referencingLayer.selectionChanged.connect(self.selectParentFromChilds)
 
     def disconnectRelations(self):
@@ -158,27 +160,27 @@ class QgsRelationSelector(QObject):
                 pass
 
     def selectParentFromChilds(self, fids):
-        rl = self.manager.referencingRelations(self.sender())[0]
+        rls = self.manager.referencingRelations(self.sender())
+        for rl in rls:
+            referencingLayer = rl.referencingLayer()
+            referencedLayer = rl.referencedLayer()
 
-        referencingLayer = rl.referencingLayer()
-        referencedLayer = rl.referencedLayer()
+            request = QgsFeatureRequest().setFilterFids(fids)
+            it = referencingLayer.getFeatures(request)
+            parentIds = [rl.getReferencedFeature(i).id() for i in it]
 
-        request = QgsFeatureRequest().setFilterFids(fids)
-        it = referencingLayer.getFeatures(request)
-        parentIds = [rl.getReferencedFeature(i).id() for i in it]
+            referencingLayer.blockSignals(True)
+            referencedLayer.setSelectedFeatures(parentIds)
+            referencingLayer.blockSignals(False)
 
-        referencingLayer.blockSignals(True)
-        referencedLayer.setSelectedFeatures(parentIds)
-        referencingLayer.blockSignals(False)
+            if self.activeReferencedLayerOnSelection:
+                self.iface.setActiveLayer(referencedLayer)
 
-        if self.activeReferencedLayerOnSelection:
-            self.iface.setActiveLayer(referencedLayer)
+            if self.zoomToReferencedLayerSelection:
+                self.mc.zoomToSelected(referencedLayer)
 
-        if self.zoomToReferencedLayerSelection:
-            self.mc.zoomToSelected(referencedLayer)
-
-        referencedLayer.triggerRepaint()
-        referencingLayer.triggerRepaint()
+            referencedLayer.triggerRepaint()
+            referencingLayer.triggerRepaint()
 
     def selectChildsFromParent(self, fids):
         rls = self.manager.referencedRelations(self.sender())
