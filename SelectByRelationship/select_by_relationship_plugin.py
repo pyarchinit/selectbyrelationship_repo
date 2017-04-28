@@ -22,16 +22,13 @@
  ***************************************************************************/
 """
 
+import os.path
+
 from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
 from PyQt4.QtGui import QAction, QIcon
 
-# Initialize Qt resources from file resources.py
-import resources
-# Import the code for the dialog
-from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
-import os.path
+# from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 from relation_selector_handler import QgsRelationSelector
-
 
 class SelectByRelationship(QObject):
     """QGIS Plugin Implementation."""
@@ -141,7 +138,7 @@ class SelectByRelationship(QObject):
         """
 
         # Create the dialog (after translation) and keep reference
-        self.dlg = SelectByRelationshipDialog()
+        # self.dlg = SelectByRelationshipDialog()
 
         icon = QIcon(icon_path)
         action = QAction(icon, text, parent)
