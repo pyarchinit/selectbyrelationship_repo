@@ -3,7 +3,8 @@
 /***************************************************************************
  SelectByRelationshipDialog
                                  A QGIS plugin
- The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a Qgis project. 
+ The plugin allows to select records through tables based on relationships
+ one-to-one or one-to-many specified inside a Qgis project.
                              -------------------
         begin                : 2017-04-20
         git sha              : $Format:%H$
