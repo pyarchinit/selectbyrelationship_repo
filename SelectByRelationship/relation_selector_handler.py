@@ -26,16 +26,16 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 __revision__ = '$Format:%H$'
 
 from PyQt4.QtCore import QObject
-from qgis.core import QgsFeatureRequest, QgsProject
+from qgis.core import QgsFeatureRequest, QgsProject, QgsMapLayerRegistry
 
 
 class QgsRelationSelector(QObject):
-    def __init__(self, iface, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, parent, activeReferencedLayer=False, zoomReferencedFeature=False):
         """
         Class to handle selection between layer relationships
 
         Usage:
-        >>> RS = QgsRelationSelector(iface)
+        >>> RS = QgsRelationSelector(parent)
         # switching to parent layer by selecting a row on child layer
         >>> RS.activeParentLayer = True
         # zoom to parent feature by selecting a row on child layer
@@ -48,7 +48,7 @@ class QgsRelationSelector(QObject):
         >>> RS.disable()
 
         You can initializing properties directly from constructor as well
-        >>> RS = QgsRelationSelector(iface, activeReferencedLayer=True, zoomReferencedFeature=False)
+        >>> RS = QgsRelationSelector(parent, activeReferencedLayer=True, zoomReferencedFeature=False)
 
         :param iface: QgisInterface object
         :param activeReferencedLayer: whether or not activing layer on selection
@@ -56,8 +56,12 @@ class QgsRelationSelector(QObject):
         :param zoomReferencedFeature: whether or not zooming layer on selection
         :type zoomReferencedFeature: bool
         """
-        super(QgsRelationSelector, self).__init__(iface)
-        self.iface = iface
+        super(QgsRelationSelector, self).__init__(parent)
+        self.parent = parent
+        self.iface = self.parent.iface
+
+        self.reg = QgsMapLayerRegistry.instance()
+        self.reg.layersWillBeRemoved.connect(self.disable)
 
         self.manager = QgsProject.instance().relationManager()
         self.manager.changed.connect(self.relationsChanged)
@@ -70,19 +74,22 @@ class QgsRelationSelector(QObject):
         self.selectChildFromParent = False
 
         self.mc = self.iface.mapCanvas()
+        self.disabled = False
 
     def enable(self):
         if len(self.relations) == 0:
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             return False
         self.connectChildRelations()
+        self.disabled = False
         return True
 
     def disable(self):
-        self.disconnectRelations()
-        if self.manager:
+        if not self.disabled:
+            self.disconnectRelations()
             self.manager.changed.disconnect(self.relationsChanged)
-        self.deleteLater()
+            self.disabled = True
+            self.parent.buttonToggled.emit(False)
 
     def clear(self):
         self.manager.clear()
@@ -180,9 +187,11 @@ class QgsRelationSelector(QObject):
             referencedLayer = rl.referencedLayer()
 
             request = QgsFeatureRequest().setFilterFids(fids)
-            f = next(referencedLayer.getFeatures(request))
-            it = rl.getRelatedFeatures(f)
-            childIds = [i.id() for i in it]
+            fit = referencedLayer.getFeatures(request)
+            childIds = []
+            for f in fit:
+                it = rl.getRelatedFeatures(f)
+                childIds.extend([i.id() for i in it])
 
             referencedLayer.blockSignals(True)
             referencingLayer.setSelectedFeatures(childIds)
