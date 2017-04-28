@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/plugins/SelectByRelationship">
+    <qresource prefix="/plugins/SelectByRelationship" >
         <file>icon.svg</file>
     </qresource>
 </RCC>
