@@ -1,4 +1,4 @@
-# ![logo](icon.png) Select by Relationship
+# ![logo](icon.svg) Select by Relationship
 
 The QGIS plugin allows by a single click on the plugin-button to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
 
