@@ -23,13 +23,14 @@
 """
 
 import os.path
-import resources
+from . import resources
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
-from PyQt4.QtGui import QAction, QIcon
+from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction
 
 # from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
-from relation_selector_handler import QgsRelationSelector
+from .relation_selector_handler import QgsRelationSelector
 
 class SelectByRelationship(QObject):
     """QGIS Plugin Implementation."""

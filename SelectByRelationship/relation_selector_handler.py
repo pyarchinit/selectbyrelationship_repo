@@ -25,8 +25,8 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import QObject
-from qgis.core import QgsFeatureRequest, QgsProject, QgsMapLayerRegistry
+from PyQt5.QtCore import QObject
+from qgis.core import QgsFeatureRequest, QgsProject, QgsMapLayerStore
 
 
 class QgsRelationSelector(QObject):
@@ -60,7 +60,7 @@ class QgsRelationSelector(QObject):
         self.parent = parent
         self.iface = self.parent.iface
 
-        self.reg = QgsMapLayerRegistry.instance()
+        self.reg = QgsMapLayerStore()
         self.reg.layersWillBeRemoved.connect(self.disable)
 
         self.manager = QgsProject.instance().relationManager()
@@ -131,7 +131,7 @@ class QgsRelationSelector(QObject):
             self.connectParentRelations()
 
     def connectParentRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencedLayer = rl.referencedLayer()
             if self.childFromParentSelection:
                 referencedLayer.selectionChanged.connect(self.selectChildsFromParent)
@@ -142,12 +142,12 @@ class QgsRelationSelector(QObject):
                     pass
 
     def connectChildRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencingLayer = rl.referencingLayer()
             referencingLayer.selectionChanged.connect(self.selectParentFromChilds)
 
     def disconnectRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencedLayer = rl.referencedLayer()
             referencingLayer = rl.referencingLayer()
             try:
@@ -168,7 +168,7 @@ class QgsRelationSelector(QObject):
             parentIds = [rl.getReferencedFeature(i).id() for i in it]
 
             referencingLayer.blockSignals(True)
-            referencedLayer.setSelectedFeatures(parentIds)
+            referencedLayer.selectByIds(parentIds)
             referencingLayer.blockSignals(False)
 
             if self.activeReferencedLayerOnSelection:
@@ -194,7 +194,7 @@ class QgsRelationSelector(QObject):
                 childIds.extend([i.id() for i in it])
 
             referencedLayer.blockSignals(True)
-            referencingLayer.setSelectedFeatures(childIds)
+            referencingLayer.selectByIds(childIds)
             referencedLayer.blockSignals(False)
 
             referencedLayer.triggerRepaint()
