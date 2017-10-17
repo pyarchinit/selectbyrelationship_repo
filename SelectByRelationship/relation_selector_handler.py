@@ -193,9 +193,10 @@ class QgsRelationSelector(QObject):
                 it = rl.getRelatedFeatures(f)
                 childIds.extend([i.id() for i in it])
 
-            referencedLayer.blockSignals(True)
-            referencingLayer.setSelectedFeatures(childIds)
-            referencedLayer.blockSignals(False)
+            if childIds:
+                referencedLayer.blockSignals(True)
+                referencingLayer.setSelectedFeatures(childIds)
+                referencedLayer.blockSignals(False)
 
             referencedLayer.triggerRepaint()
             referencingLayer.triggerRepaint()
