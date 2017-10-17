@@ -174,7 +174,7 @@ class QgsRelationSelector(QObject):
             if self.activeReferencedLayerOnSelection:
                 self.iface.setActiveLayer(referencedLayer)
 
-            if self.zoomToReferencedLayerSelection:
+            if self.zoomToReferencedLayerSelection and referencedLayer.isSpatial():
                 self.mc.zoomToSelected(referencedLayer)
 
             referencedLayer.triggerRepaint()
