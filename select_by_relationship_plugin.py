@@ -153,7 +153,7 @@ class SelectByRelationship(QObject):
         icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'settings.svg'))
         self.actionSettings = self.add_action(
             icon_settings,
-            text=self.tr(u'Settings relationship'),
+            text=self.tr(u'Settings'),
             checkable=False,
             callback=self.showSettings,
             parent=self.iface.mainWindow())
