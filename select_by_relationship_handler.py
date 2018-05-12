@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    relation_selector_handler.py
+    select_by_relationship_handler.py
     ---------------------
     Date                 : April 2017
     Copyright            : (C) 2017 by Salvatore Larosa
@@ -75,7 +75,7 @@ class QgsRelationSelector(QObject):
         self.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
 
         self.mc = self.iface.mapCanvas()
-        self.disabled = False
+        self.disabled = True
 
     def enable(self):
         if len(self.relations) == 0:

@@ -1,4 +1,4 @@
-# ![logo](icon.png) Select by Relationship
+# ![logo](images/icon.png) Select by Relationship
 [![GitHub release](https://img.shields.io/github/release/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
 [![HitCount](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo.svg)](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo)
@@ -22,5 +22,5 @@ This plugin has an awesome history:
 A videotutorial by Salvatore Fiandaca where it's showed the use of python macro by Salvatore Larosa:
 https://www.youtube.com/watch?v=PRDftcPWNg8
 
-An other videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
+One more videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
 https://www.youtube.com/watch?v=4lXRnsMO-qI

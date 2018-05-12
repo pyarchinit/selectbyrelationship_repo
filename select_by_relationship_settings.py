@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    settings.py
+    select_by_relationship_settings.py
     ---------------------
     Date                 : May 2018
     Copyright            : (C) 2018 by Salvatore Larosa
@@ -31,7 +31,7 @@ from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUiType
 from qgis.core import QgsSettings
 
-from .relation_selector_handler import QgsRelationSelector
+from .select_by_relationship_handler import QgsRelationSelector
 
 MAIN_DIALOG_CLASS, _ = loadUiType(os.path.abspath(
     os.path.join(os.path.dirname(__file__), 'settings.ui')))
@@ -71,7 +71,8 @@ class SettingsDialog(QDialog, MAIN_DIALOG_CLASS):
         self.sFr.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
         self.sFr.selectChildFromParent = self.s.value('relate/selectChildFromParent', type=bool)
         self.sFr.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
-        self.dlg.buttonToggled.emit(True)
+        if not self.sFr.disabled:
+            self.dlg.buttonToggled.emit(True)
 
         super(SettingsDialog, self).accept()
 

@@ -28,8 +28,8 @@ from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication,
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
 
-from .relation_selector_handler import QgsRelationSelector
-from .settings import SettingsDialog
+from .select_by_relationship_handler import QgsRelationSelector
+from .select_by_relationship_settings import SettingsDialog
 
 
 class SelectByRelationship(QObject):
@@ -45,48 +45,16 @@ class SelectByRelationship(QObject):
         :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
-        QObject.__init__(self, iface)
+        super(SelectByRelationship, self).__init__(iface)
         self.iface = iface
-        # initialize plugin directory
-        self.plugin_dir = os.path.dirname(__file__)
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'SelectByRelationship_{}.qm'.format(locale))
 
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
-
-        # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Select by relationship')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
         self.toolbar.setObjectName(u'SelectByRelationship')
 
         self.sFr = None
         self.buttonToggled.connect(self.toggleButton)
-
-    # noinspection PyMethodMayBeStatic
-    def tr(self, message):
-        """Get the translation for a string using Qt translation API.
-
-        We implement this ourselves since we do not inherit QObject.
-
-        :param message: String for translation.
-        :type message: str, QString
-
-        :returns: Translated version of message.
-        :rtype: QString
-        """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('SelectByRelationship', message)
 
     def add_action(
             self,
@@ -172,7 +140,7 @@ class SelectByRelationship(QObject):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_plugin = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'icon.svg'))
+        icon_plugin = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'icon.svg'))
         self.actionRelations = self.add_action(
             icon_plugin,
             text=self.tr(u'Allows selections by relationship'),
@@ -180,7 +148,7 @@ class SelectByRelationship(QObject):
             callback=self.run,
             parent=self.iface.mainWindow())
 
-        icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'settings.svg'))
+        icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'settings.svg'))
         self.actionSettings = self.add_action(
             icon_settings,
             text=self.tr(u'Settings relationship'),
