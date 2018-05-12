@@ -1,4 +1,9 @@
-# ![logo](icon.png) Select by Relationship
+# ![logo](images/icon.png) Select by Relationship
+[![GitHub release](https://img.shields.io/github/release/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
+[![GitHub repo size in bytes](https://img.shields.io/github/repo-size/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
+[![HitCount](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo.svg)](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo)
+[![Donate to QGIS](https://img.shields.io/badge/donate%20to-QGIS-green.svg?style=flat-square)](http://qgis.org/en/site/getinvolved/donations.html)
+
 
 The QGIS plugin allows by a single click on the plugin-button to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
 
@@ -17,5 +22,5 @@ This plugin has an awesome history:
 A videotutorial by Salvatore Fiandaca where it's showed the use of python macro by Salvatore Larosa:
 https://www.youtube.com/watch?v=PRDftcPWNg8
 
-An other videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
+One more videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
 https://www.youtube.com/watch?v=4lXRnsMO-qI

@@ -1,16 +1,8 @@
-# This file contains metadata for your plugin. Since 
-# version 2.0 of QGIS this is the proper way to supply 
-# information about a plugin. The old method of 
-# embedding metadata in __init__.py will 
-# is no longer supported since version 2.0.
-
-# This file should be included when you package your plugin.# Mandatory items:
-
 [general]
 name=Select by relationship
-qgisMinimumVersion=2.0
+qgisMinimumVersion=3.0
 description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
-version=0.2.1
+version=0.3.0
 author=Luca Mandolesi, Salvatore Larosa
 email=pyarchinit@gmail.com
 
@@ -23,14 +15,14 @@ repository=https://github.com/pyarchinit/selectbyrelationship_repo
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-changelog=Version 0.2.1:<br>Bug fix release
+changelog=Release for QGIS3
 
 # Tags are comma separated with spaces allowed
 tags=select, relationship, database
 
 homepage=https://github.com/pyarchinit/selectbyrelationship_repo/wiki
 category=Database
-icon=icon.svg
+icon=images/icon.svg
 # experimental flag
 experimental=True
 

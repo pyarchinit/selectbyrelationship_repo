@@ -23,13 +23,16 @@
 """
 
 import os.path
-import resources
 
-from PyQt4.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
-from PyQt4.QtGui import QAction, QIcon
 
-# from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
-from relation_selector_handler import QgsRelationSelector
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsSettings
+
+from .select_by_relationship_handler import QgsRelationSelector
+from .select_by_relationship_settings import SettingsDialog
+
 
 class SelectByRelationship(QObject):
     """QGIS Plugin Implementation."""
@@ -44,48 +47,16 @@ class SelectByRelationship(QObject):
         :type iface: QgsInterface
         """
         # Save reference to the QGIS interface
-        QObject.__init__(self, iface)
+        super(SelectByRelationship, self).__init__(iface)
         self.iface = iface
-        # initialize plugin directory
-        self.plugin_dir = os.path.dirname(__file__)
-        # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
-        locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'SelectByRelationship_{}.qm'.format(locale))
 
-        if os.path.exists(locale_path):
-            self.translator = QTranslator()
-            self.translator.load(locale_path)
-
-            if qVersion() > '4.3.3':
-                QCoreApplication.installTranslator(self.translator)
-
-        # Declare instance attributes
         self.actions = []
         self.menu = self.tr(u'&Select by relationship')
-        # TODO: We are going to let the user set this up in a future iteration
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
         self.toolbar.setObjectName(u'SelectByRelationship')
 
         self.sFr = None
         self.buttonToggled.connect(self.toggleButton)
-
-    # noinspection PyMethodMayBeStatic
-    def tr(self, message):
-        """Get the translation for a string using Qt translation API.
-
-        We implement this ourselves since we do not inherit QObject.
-
-        :param message: String for translation.
-        :type message: str, QString
-
-        :returns: Translated version of message.
-        :rtype: QString
-        """
-        # noinspection PyTypeChecker,PyArgumentList,PyCallByClass
-        return QCoreApplication.translate('SelectByRelationship', message)
 
     def add_action(
             self,
@@ -171,12 +142,20 @@ class SelectByRelationship(QObject):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/SelectByRelationship/icon.svg'
+        icon_plugin = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'icon.svg'))
         self.actionRelations = self.add_action(
-            icon_path,
+            icon_plugin,
             text=self.tr(u'Allows selections by relationship'),
             checkable=True,
             callback=self.run,
+            parent=self.iface.mainWindow())
+
+        icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'settings.svg'))
+        self.actionSettings = self.add_action(
+            icon_settings,
+            text=self.tr(u'Settings relationship'),
+            checkable=False,
+            callback=self.showSettings,
             parent=self.iface.mainWindow())
 
     def unload(self):
@@ -193,14 +172,17 @@ class SelectByRelationship(QObject):
     def toggleButton(self, toggled):
         self.actionRelations.setChecked(toggled)
 
+    def updateSettings(self):
+        s = QgsSettings()
+        self.sFr.zoomParentFeature = s.value('relate/zoomParentFeature', type=bool)
+        self.sFr.selectChildFromParent = s.value('relate/selectChildFromParent', type=bool)
+        self.sFr.activeParentLayer = s.value('relate/activeParentLayer', type=bool)
+
     def run(self, toggle):
         """Run method that performs all the real work"""
         # self.debug_trace()
         if toggle:
             self.sFr = QgsRelationSelector(self)
-            # self.sFr.zoomParentFeature = True
-            # self.sFr.selectChildFromParent = True
-            # self.sFr.activeParentLayer = True
             ok = self.sFr.enable()
             if not ok:
                 self.buttonToggled.emit(False)
@@ -208,12 +190,15 @@ class SelectByRelationship(QObject):
             if self.sFr:
                 self.sFr.disable()
 
+    def showSettings(self):
+        rsettings = SettingsDialog(self, self.iface.mainWindow())
+        rsettings.show()
+        rsettings.raise_()
+
     def debug_trace(self):
         """Set a tracepoint in the Python debugger that works with Qt"""
 
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        # Or for Qt5
-        # from PyQt5.QtCore import pyqtRemoveInputHook
+        from PyQt5.QtCore import pyqtRemoveInputHook
         from pdb import set_trace
         pyqtRemoveInputHook()
         set_trace()

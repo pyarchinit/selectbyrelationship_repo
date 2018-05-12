@@ -2,7 +2,7 @@
 
 """
 ***************************************************************************
-    relation_selector_handler.py
+    select_by_relationship_handler.py
     ---------------------
     Date                 : April 2017
     Copyright            : (C) 2017 by Salvatore Larosa
@@ -25,12 +25,13 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 
 __revision__ = '$Format:%H$'
 
-from PyQt4.QtCore import QObject
-from qgis.core import QgsFeatureRequest, QgsProject, QgsMapLayerRegistry
+
+from qgis.core import QgsFeatureRequest, QgsProject, QgsSettings
+from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, QObject
 
 
 class QgsRelationSelector(QObject):
-    def __init__(self, parent, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, parent):
         """
         Class to handle selection between layer relationships
 
@@ -59,19 +60,20 @@ class QgsRelationSelector(QObject):
         super(QgsRelationSelector, self).__init__(parent)
         self.parent = parent
         self.iface = self.parent.iface
+        self.s = QgsSettings()
 
-        self.reg = QgsMapLayerRegistry.instance()
-        self.reg.layersWillBeRemoved.connect(self.disable)
+        self.prj = QgsProject.instance()
+        self.prj.layersWillBeRemoved.connect(self.disable)
 
-        self.manager = QgsProject.instance().relationManager()
+        self.manager = self.prj.relationManager()
         self.manager.changed.connect(self.relationsChanged)
 
         self.relations = self.manager.relations()
         self.relationsBuffer = self.relationsBackup = self.relations
 
-        self.activeParentLayer = activeReferencedLayer
-        self.zoomParentFeature = zoomReferencedFeature
-        self.selectChildFromParent = False
+        self.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
+        self.selectChildFromParent = self.s.value('relate/selectChildFromParent', type=bool)
+        self.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
 
         self.mc = self.iface.mapCanvas()
         self.disabled = False
@@ -81,6 +83,7 @@ class QgsRelationSelector(QObject):
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             return False
         self.connectChildRelations()
+        self.manager.changed.connect(self.relationsChanged)
         self.disabled = False
         return True
 
@@ -131,7 +134,7 @@ class QgsRelationSelector(QObject):
             self.connectParentRelations()
 
     def connectParentRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencedLayer = rl.referencedLayer()
             if self.childFromParentSelection:
                 referencedLayer.selectionChanged.connect(self.selectChildsFromParent)
@@ -142,12 +145,12 @@ class QgsRelationSelector(QObject):
                     pass
 
     def connectChildRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencingLayer = rl.referencingLayer()
             referencingLayer.selectionChanged.connect(self.selectParentFromChilds)
 
     def disconnectRelations(self):
-        for _, rl in self.relations.iteritems():
+        for _, rl in self.relations.items():
             referencedLayer = rl.referencedLayer()
             referencingLayer = rl.referencingLayer()
             try:
@@ -168,13 +171,14 @@ class QgsRelationSelector(QObject):
             parentIds = [rl.getReferencedFeature(i).id() for i in it]
 
             referencingLayer.blockSignals(True)
-            referencedLayer.setSelectedFeatures(parentIds)
+            referencedLayer.selectByIds(parentIds)
             referencingLayer.blockSignals(False)
 
             if self.activeReferencedLayerOnSelection:
                 self.iface.setActiveLayer(referencedLayer)
 
-            if self.zoomToReferencedLayerSelection and referencedLayer.isSpatial():
+            if self.zoomToReferencedLayerSelection:
+                print(self.zoomToReferencedLayerSelection)
                 self.mc.zoomToSelected(referencedLayer)
 
             referencedLayer.triggerRepaint()
@@ -193,10 +197,9 @@ class QgsRelationSelector(QObject):
                 it = rl.getRelatedFeatures(f)
                 childIds.extend([i.id() for i in it])
 
-            if childIds:
-                referencedLayer.blockSignals(True)
-                referencingLayer.setSelectedFeatures(childIds)
-                referencedLayer.blockSignals(False)
+            referencedLayer.blockSignals(True)
+            referencingLayer.selectByIds(childIds)
+            referencedLayer.blockSignals(False)
 
             referencedLayer.triggerRepaint()
             referencingLayer.triggerRepaint()
