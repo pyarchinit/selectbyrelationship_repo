@@ -24,13 +24,14 @@
 
 import os
 
-from PyQt4 import QtGui, uic
+from qgis.PyQt.QtWidgets import QDialog
+from qgis.PyQt.uic import loadUiType
 
-FORM_CLASS, _ = uic.loadUiType(os.path.join(
+MAIN_DIALOG_CLASS, _ = loadUiType(os.path.join(
     os.path.dirname(__file__), 'select_by_relationship_plugin_dialog_base.ui'))
 
 
-class SelectByRelationshipDialog(QtGui.QDialog, FORM_CLASS):
+class SelectByRelationshipDialog(QDialog, MAIN_DIALOG_CLASS):
     def __init__(self, parent=None):
         """Constructor."""
         super(SelectByRelationshipDialog, self).__init__(parent)

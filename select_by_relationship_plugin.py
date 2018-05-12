@@ -24,9 +24,9 @@
 
 import os.path
 
-from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QAction
+from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
+from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtWidgets import QAction
 
 from .relation_selector_handler import QgsRelationSelector
 from .settings import SettingsDialog
@@ -172,17 +172,17 @@ class SelectByRelationship(QObject):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'icon.svg'))
+        icon_plugin = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'icon.svg'))
         self.actionRelations = self.add_action(
-            icon_path,
+            icon_plugin,
             text=self.tr(u'Allows selections by relationship'),
             checkable=True,
             callback=self.run,
             parent=self.iface.mainWindow())
 
-        icon_path = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'settings.svg'))
+        icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'settings.svg'))
         self.actionSettings = self.add_action(
-            icon_path,
+            icon_settings,
             text=self.tr(u'Settings relationship'),
             checkable=False,
             callback=self.showSettings,
@@ -218,15 +218,14 @@ class SelectByRelationship(QObject):
                 self.sFr.disable()
 
     def showSettings(self):
-        settings = SettingsDialog()
-        settings.show()
+        rsettings = SettingsDialog()
+        rsettings.show()
+        rsettings.raise_()
 
     def debug_trace(self):
         """Set a tracepoint in the Python debugger that works with Qt"""
 
-        from PyQt4.QtCore import pyqtRemoveInputHook
-        # Or for Qt5
-        # from PyQt5.QtCore import pyqtRemoveInputHook
+        from PyQt5.QtCore import pyqtRemoveInputHook
         from pdb import set_trace
         pyqtRemoveInputHook()
         set_trace()
