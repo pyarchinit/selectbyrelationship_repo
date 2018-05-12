@@ -1,15 +1,6 @@
-# This file contains metadata for your plugin. Since 
-# version 2.0 of QGIS this is the proper way to supply 
-# information about a plugin. The old method of 
-# embedding metadata in __init__.py will 
-# is no longer supported since version 2.0.
-
-# This file should be included when you package your plugin.# Mandatory items:
-
 [general]
 name=Select by relationship
-qgisMinimumVersion=2.99
-qgisMaximumVersion=3.99
+qgisMinimumVersion=3.0
 description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
 version=0.2.1
 author=Luca Mandolesi, Salvatore Larosa

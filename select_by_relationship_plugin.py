@@ -23,14 +23,14 @@
 """
 
 import os.path
-from . import resources
 
 from PyQt5.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QAction
 
-# from select_by_relationship_plugin_dialog import SelectByRelationshipDialog
 from .relation_selector_handler import QgsRelationSelector
+from .settings import SettingsDialog
+
 
 class SelectByRelationship(QObject):
     """QGIS Plugin Implementation."""
@@ -172,12 +172,20 @@ class SelectByRelationship(QObject):
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = ':/plugins/SelectByRelationship/icon.svg'
+        icon_path = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'icon.svg'))
         self.actionRelations = self.add_action(
             icon_path,
             text=self.tr(u'Allows selections by relationship'),
             checkable=True,
             callback=self.run,
+            parent=self.iface.mainWindow())
+
+        icon_path = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'settings.svg'))
+        self.actionSettings = self.add_action(
+            icon_path,
+            text=self.tr(u'Settings relationship'),
+            checkable=False,
+            callback=self.showSettings,
             parent=self.iface.mainWindow())
 
     def unload(self):
@@ -208,6 +216,10 @@ class SelectByRelationship(QObject):
         else:
             if self.sFr:
                 self.sFr.disable()
+
+    def showSettings(self):
+        settings = SettingsDialog()
+        settings.show()
 
     def debug_trace(self):
         """Set a tracepoint in the Python debugger that works with Qt"""
