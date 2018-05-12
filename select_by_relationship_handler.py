@@ -25,8 +25,9 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 
 __revision__ = '$Format:%H$'
 
-from PyQt5.QtCore import QObject
+
 from qgis.core import QgsFeatureRequest, QgsProject, QgsSettings
+from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, QObject
 
 
 class QgsRelationSelector(QObject):
@@ -75,7 +76,7 @@ class QgsRelationSelector(QObject):
         self.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
 
         self.mc = self.iface.mapCanvas()
-        self.disabled = True
+        self.disabled = False
 
     def enable(self):
         if len(self.relations) == 0:

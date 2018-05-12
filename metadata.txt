@@ -15,7 +15,7 @@ repository=https://github.com/pyarchinit/selectbyrelationship_repo
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-changelog=Version for QGIS3
+changelog=Release for QGIS3
 
 # Tags are comma separated with spaces allowed
 tags=select, relationship, database

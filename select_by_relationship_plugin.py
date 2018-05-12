@@ -24,9 +24,11 @@
 
 import os.path
 
+
 from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction
+from qgis.core import QgsSettings
 
 from .select_by_relationship_handler import QgsRelationSelector
 from .select_by_relationship_settings import SettingsDialog
@@ -169,6 +171,12 @@ class SelectByRelationship(QObject):
     @pyqtSlot(bool)
     def toggleButton(self, toggled):
         self.actionRelations.setChecked(toggled)
+
+    def updateSettings(self):
+        s = QgsSettings()
+        self.sFr.zoomParentFeature = s.value('relate/zoomParentFeature', type=bool)
+        self.sFr.selectChildFromParent = s.value('relate/selectChildFromParent', type=bool)
+        self.sFr.activeParentLayer = s.value('relate/activeParentLayer', type=bool)
 
     def run(self, toggle):
         """Run method that performs all the real work"""

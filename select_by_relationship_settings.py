@@ -48,8 +48,6 @@ class SettingsDialog(QDialog, MAIN_DIALOG_CLASS):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.sFr = QgsRelationSelector(self.dlg)
-
         self.chkActiveParent.setChecked(self.s.value('relate/activeParentLayer', False, type=bool))
         self.chkZoomParent.setChecked(self.s.value('relate/zoomParentFeature', False, type=bool))
         self.chkSelectParent.setChecked(self.s.value('relate/selectChildFromParent', False, type=bool))
@@ -64,15 +62,11 @@ class SettingsDialog(QDialog, MAIN_DIALOG_CLASS):
         self.sFr.zoomParentFeature = enable
 
     def accept(self):
-        self.sFr.disable()
         self.s.setValue('relate/activeParentLayer', self.chkActiveParent.isChecked())
         self.s.setValue('relate/zoomParentFeature', self.chkZoomParent.isChecked())
         self.s.setValue('relate/selectChildFromParent', self.chkSelectParent.isChecked())
-        self.sFr.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
-        self.sFr.selectChildFromParent = self.s.value('relate/selectChildFromParent', type=bool)
-        self.sFr.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
-        if not self.sFr.disabled:
-            self.dlg.buttonToggled.emit(True)
+
+        self.dlg.updateSettings()
 
         super(SettingsDialog, self).accept()
 
