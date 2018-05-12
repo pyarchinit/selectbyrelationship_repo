@@ -207,9 +207,6 @@ class SelectByRelationship(QObject):
         # self.debug_trace()
         if toggle:
             self.sFr = QgsRelationSelector(self)
-            # self.sFr.zoomParentFeature = True
-            # self.sFr.selectChildFromParent = True
-            # self.sFr.activeParentLayer = True
             ok = self.sFr.enable()
             if not ok:
                 self.buttonToggled.emit(False)
@@ -218,7 +215,7 @@ class SelectByRelationship(QObject):
                 self.sFr.disable()
 
     def showSettings(self):
-        rsettings = SettingsDialog()
+        rsettings = SettingsDialog(self, self.iface.mainWindow())
         rsettings.show()
         rsettings.raise_()
 

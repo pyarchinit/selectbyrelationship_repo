@@ -27,21 +27,21 @@
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QCheckBox" name="checkBox">
+      <widget class="QCheckBox" name="chkZoomParent">
        <property name="text">
         <string>Zoom to Parent Feature</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox_2">
+      <widget class="QCheckBox" name="chkSelectParent">
        <property name="text">
         <string>Select Child from Parent</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="checkBox_3">
+      <widget class="QCheckBox" name="chkActiveParent">
        <property name="text">
         <string>Active Parent Layer</string>
        </property>

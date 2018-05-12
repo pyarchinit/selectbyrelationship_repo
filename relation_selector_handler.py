@@ -26,11 +26,11 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 __revision__ = '$Format:%H$'
 
 from PyQt5.QtCore import QObject
-from qgis.core import QgsFeatureRequest, QgsProject
+from qgis.core import QgsFeatureRequest, QgsProject, QgsSettings
 
 
 class QgsRelationSelector(QObject):
-    def __init__(self, parent, activeReferencedLayer=False, zoomReferencedFeature=False):
+    def __init__(self, parent):
         """
         Class to handle selection between layer relationships
 
@@ -59,6 +59,7 @@ class QgsRelationSelector(QObject):
         super(QgsRelationSelector, self).__init__(parent)
         self.parent = parent
         self.iface = self.parent.iface
+        self.s = QgsSettings()
 
         self.prj = QgsProject.instance()
         self.prj.layersWillBeRemoved.connect(self.disable)
@@ -69,9 +70,9 @@ class QgsRelationSelector(QObject):
         self.relations = self.manager.relations()
         self.relationsBuffer = self.relationsBackup = self.relations
 
-        self.activeParentLayer = activeReferencedLayer
-        self.zoomParentFeature = zoomReferencedFeature
-        self.selectChildFromParent = False
+        self.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
+        self.selectChildFromParent = self.s.value('relate/selectChildFromParent', type=bool)
+        self.activeParentLayer = self.s.value('relate/activeParentLayer', type=bool)
 
         self.mc = self.iface.mapCanvas()
         self.disabled = False
@@ -81,6 +82,7 @@ class QgsRelationSelector(QObject):
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             return False
         self.connectChildRelations()
+        self.manager.changed.connect(self.relationsChanged)
         self.disabled = False
         return True
 
@@ -175,6 +177,7 @@ class QgsRelationSelector(QObject):
                 self.iface.setActiveLayer(referencedLayer)
 
             if self.zoomToReferencedLayerSelection:
+                print(self.zoomToReferencedLayerSelection)
                 self.mc.zoomToSelected(referencedLayer)
 
             referencedLayer.triggerRepaint()
