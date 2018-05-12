@@ -8,7 +8,8 @@
 
 [general]
 name=Select by relationship
-qgisMinimumVersion=2.0
+qgisMinimumVersion=2.99
+qgisMaximumVersion=3.99
 description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
 version=0.2.1
 author=Luca Mandolesi, Salvatore Larosa

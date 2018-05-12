@@ -26,7 +26,7 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 __revision__ = '$Format:%H$'
 
 from PyQt5.QtCore import QObject
-from qgis.core import QgsFeatureRequest, QgsProject, QgsMapLayerStore
+from qgis.core import QgsFeatureRequest, QgsProject
 
 
 class QgsRelationSelector(QObject):
@@ -60,10 +60,10 @@ class QgsRelationSelector(QObject):
         self.parent = parent
         self.iface = self.parent.iface
 
-        self.reg = QgsMapLayerStore()
-        self.reg.layersWillBeRemoved.connect(self.disable)
+        self.prj = QgsProject.instance()
+        self.prj.layersWillBeRemoved.connect(self.disable)
 
-        self.manager = QgsProject.instance().relationManager()
+        self.manager = self.prj.relationManager()
         self.manager.changed.connect(self.relationsChanged)
 
         self.relations = self.manager.relations()
