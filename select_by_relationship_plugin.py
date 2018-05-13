@@ -155,6 +155,7 @@ class SelectByRelationship(QObject):
             icon_settings,
             text=self.tr(u'Settings'),
             checkable=False,
+            enabled_flag=False,
             callback=self.showSettings,
             parent=self.iface.mainWindow())
 
@@ -184,11 +185,13 @@ class SelectByRelationship(QObject):
         if toggle:
             self.sFr = QgsRelationSelector(self)
             ok = self.sFr.enable()
+            self.actionSettings.setEnabled(ok)
             if not ok:
                 self.buttonToggled.emit(False)
         else:
             if self.sFr:
                 self.sFr.disable()
+                self.actionSettings.setEnabled(False)
 
     def showSettings(self):
         rsettings = SettingsDialog(self, self.iface.mainWindow())
