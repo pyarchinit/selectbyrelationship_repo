@@ -40,14 +40,14 @@
    <item row="2" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Referenced Layer is &lt;/span&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Parent&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Parent &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;is Referenced Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
    <item row="3" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Referencing Layer is &lt;/span&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Child&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; font-style:italic;&quot;&gt;Child &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;is &lt;/span&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Referencing Layer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
@@ -74,21 +74,21 @@
         <item>
          <widget class="QCheckBox" name="chkZoomParent">
           <property name="text">
-           <string>Zoom to Feature of Referenced Layer</string>
+           <string>Zoom to Feature of Parent Layer</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="chkSelectParent">
           <property name="text">
-           <string>Select Feature of Referencing Layer from Referenced one</string>
+           <string>Select Feature(s) of Child from Parent Layer</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="chkActiveParent">
           <property name="text">
-           <string>Active Referenced Layer</string>
+           <string>Active Parent Layer</string>
           </property>
          </widget>
         </item>
