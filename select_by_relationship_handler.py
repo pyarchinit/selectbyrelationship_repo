@@ -123,6 +123,24 @@ class QgsRelationSelector(QObject):
     def zoomParentFeature(self, value):
         self.zoomToReferencedLayerSelection = value
 
+    def setRelations(self, relations):
+        if set(relations) == set(self.relationsBuffer.keys()):
+            self.disconnectRelations()
+            self.relations = self.manager.relations()
+            self.connectChildRelations()
+            return
+
+        self.relationsChecked = {} if not relations else self.manager.relations()
+
+        self.disconnectRelations()
+        for r in relations:
+            for k in self.relationsBuffer.keys():
+                if r != k:
+                    self.relationsChecked.pop(k, None)
+
+        self.relations = self.relationsChecked
+        self.connectChildRelations()
+
     def relationsChanged(self):
         # self.iface.messageBar().pushMessage('changed', 0)
         if len(self.relationsBuffer) >= len(self.relations):
@@ -178,7 +196,6 @@ class QgsRelationSelector(QObject):
                 self.iface.setActiveLayer(referencedLayer)
 
             if self.zoomToReferencedLayerSelection:
-                print(self.zoomToReferencedLayerSelection)
                 self.mc.zoomToSelected(referencedLayer)
 
             referencedLayer.triggerRepaint()

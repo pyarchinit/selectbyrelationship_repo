@@ -24,11 +24,11 @@
 
 import os.path
 
-
-from qgis.PyQt.QtCore import QSettings, QTranslator, qVersion, QCoreApplication, pyqtSlot, pyqtSignal, QObject
-from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
-from qgis.core import QgsSettings
+from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, QObject, Qt
+from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QPalette
+from qgis.PyQt.QtWidgets import QAction, QComboBox, QItemDelegate, QStylePainter, QStyle, QStyleOptionComboBox, \
+    QSizePolicy, QHBoxLayout, QWidget
+from qgis.core import QgsSettings, QgsApplication
 
 from .select_by_relationship_handler import QgsRelationSelector
 from .select_by_relationship_settings import SettingsDialog
@@ -49,13 +49,15 @@ class SelectByRelationship(QObject):
         # Save reference to the QGIS interface
         super(SelectByRelationship, self).__init__(iface)
         self.iface = iface
+        self.sFr = None
 
         self.actions = []
         self.menu = self.tr(u'&Select by relationship')
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
+        self.toolbar.setOrientation(Qt.Horizontal)
+        self.toolbar.setAllowedAreas(Qt.TopToolBarArea)
         self.toolbar.setObjectName(u'SelectByRelationship')
 
-        self.sFr = None
         self.buttonToggled.connect(self.toggleButton)
 
     def add_action(
@@ -150,6 +152,20 @@ class SelectByRelationship(QObject):
             callback=self.run,
             parent=self.iface.mainWindow())
 
+        w = QWidget()
+        w.setFixedWidth(210)
+        layout = QHBoxLayout(w)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+
+        self.comboRelations = CheckableComboBox()
+        self.comboRelations.popupClosed.connect(self.updateRelations)
+        self.comboRelations.setItemDelegate(CheckBoxDelegate())
+        self.comboRelations.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+        self.comboRelations.setEnabled(False)
+        layout.addWidget(self.comboRelations)
+        self.toolbar.addWidget(w)
+
         icon_settings = '{}{}'.format(os.path.dirname(__file__), os.path.join(os.sep, 'images', 'settings.svg'))
         self.actionSettings = self.add_action(
             icon_settings,
@@ -172,6 +188,23 @@ class SelectByRelationship(QObject):
     @pyqtSlot(bool)
     def toggleButton(self, toggled):
         self.actionRelations.setChecked(toggled)
+        self.comboRelations.setEnabled(toggled)
+        if toggled:
+            if self.comboRelations.count() > 0:
+                for i in range(self.comboRelations.count()):
+                    item = self.comboRelations.model().item(i, 0)
+                    if item.text() in self.comboRelations.checkedItems():
+                        item.setCheckState(Qt.Checked)
+
+            else:
+                self.comboRelations.clear()
+                relations = self.sFr.relations.keys()
+                icon = QgsApplication.getThemeIcon('relation.svg')
+                for i, relation in enumerate(relations):
+                    self.comboRelations.addItem(icon, relation)
+                    item = self.comboRelations.model().item(i, 0)
+                    item.setCheckState(Qt.Unchecked)
+                    self.comboRelations.setCheckedItems([])
 
     def updateSettings(self):
         s = QgsSettings()
@@ -186,12 +219,21 @@ class SelectByRelationship(QObject):
             self.sFr = QgsRelationSelector(self)
             ok = self.sFr.enable()
             self.actionSettings.setEnabled(ok)
-            if not ok:
-                self.buttonToggled.emit(False)
+            self.buttonToggled.emit(ok)
         else:
             if self.sFr:
                 self.sFr.disable()
+                self.deselectALL()
                 self.actionSettings.setEnabled(False)
+
+        self.updateRelations()
+
+    def deselectALL(self):
+        mc = self.iface.mapCanvas()
+        for layer in mc.layers():
+            if layer.type() == layer.VectorLayer:
+                layer.removeSelection()
+        mc.refresh()
 
     def showSettings(self):
         rsettings = SettingsDialog(self, self.iface.mainWindow())
@@ -205,3 +247,72 @@ class SelectByRelationship(QObject):
         from pdb import set_trace
         pyqtRemoveInputHook()
         set_trace()
+
+    def updateRelations(self):
+        if self.sFr and not self.sFr.disabled:
+            self.sFr.setRelations(self.comboRelations.checkedItems())
+        self.deselectALL()
+
+
+class CheckableComboBox(QComboBox):
+    popupClosed = pyqtSignal()
+
+    def __init__(self):
+        super(CheckableComboBox, self).__init__()
+        self.view().pressed.connect(self.handleItemPressed)
+        self.view().setMinimumWidth(self.view().sizeHintForColumn(0))
+        self.setModel(QStandardItemModel(self))
+        self._changed = False
+        self._checkedItems = set()
+        self.display_text = "Select relationship…"
+
+    def handleItemPressed(self, index):
+        item = self.model().itemFromIndex(index)
+        if item.checkState() == Qt.Checked:
+            item.setCheckState(Qt.Unchecked)
+            self._checkedItems -= set((item.text(),))
+        else:
+            item.setCheckState(Qt.Checked)
+            self._checkedItems |= set((item.text(),))
+
+        self._changed = True
+
+    def hidePopup(self):
+        if not self._changed:
+            super(CheckableComboBox, self).hidePopup()
+        self._changed = False
+        self.popupClosed.emit()
+
+    def checkedItems(self):
+        return self._checkedItems
+
+    def setCheckedItems(self, items):
+        for i in items:
+            self._checkedItems |= set((i,))
+
+    def paintEvent(self, event):
+        painter = QStylePainter(self)
+        painter.setPen(self.palette().color(QPalette.Text))
+
+        opt = QStyleOptionComboBox()
+        self.initStyleOption(opt)
+        if self.checkedItems():
+            count = len(self.checkedItems())
+            opt.currentText = "{} relationship(s) selected".format(count)
+        else:
+            opt.currentText = self.display_text
+        painter.drawComplexControl(QStyle.CC_ComboBox, opt)
+        painter.drawControl(QStyle.CE_ComboBoxLabel, opt)
+
+
+class CheckBoxDelegate(QItemDelegate):
+    """ Check box delegate """
+
+    def __init__(self, parent=None):
+        """ Initialization """
+        super(CheckBoxDelegate, self).__init__(parent)
+
+    def createEditor(self, op, idx):
+        """ Creates the checkbox """
+        self.editor = QCheckBox(self)
+
