@@ -27,7 +27,7 @@ https://www.youtube.com/watch?v=4lXRnsMO-qI
 
 ## Plugin Select by Relationship v3
 
-The plugin allows you to select records through tables based on ** `one-to-one` or` one-to-many` relationships specified within a QGIS project.
+The plugin allows you to select records through tables based on `one-to-one` or` one-to-many` relationships specified within a QGIS project.
 After the installation a tool bar with three buttons will appear:
 
 <img src="/images/icone_p2.png">
