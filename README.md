@@ -24,3 +24,23 @@ https://www.youtube.com/watch?v=PRDftcPWNg8
 
 One more videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
 https://www.youtube.com/watch?v=4lXRnsMO-qI
+
+## Plugin Select by Relationship v3
+
+The plugin allows you to select records through tables based on ** `one-to-one` or` one-to-many` relationships specified within a QGIS project.
+After the installation a tool bar with three buttons will appear:
+
+<img src="/images/icone_p2.png">
+
+*  the first icon: '_Allows selections by relationship_' activates/deactivates the plugin;
+* the second icon _Select Relationship_, a drop-down menu, allows you to activate the project reports; by default no relation is selected, so the plugin does not work;
+* the third icon '_settings_' has three options:
+    * Zoom to Feature to of Parent Layer;
+    * Select Feature(s) of Child From Parent Layer;
+    * Active Parent Layer;
+
+<img src="/images/icona_settings2.png">
+
+video **Salvatore Fiandaca**: [link](https://youtu.be/EGfFCOfAS5E)
+
+[![Plugin SelectByRelationshipv3](https://img.youtube.com/vi/EGfFCOfAS5E/0.jpg)](https://youtu.be/EGfFCOfAS5E "SelectByRelationshipv3")
