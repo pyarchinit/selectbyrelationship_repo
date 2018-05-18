@@ -220,6 +220,7 @@ class SelectByRelationship(QObject):
             ok = self.sFr.enable()
             self.actionSettings.setEnabled(ok)
             self.buttonToggled.emit(ok)
+            self.updateSettings()
         else:
             if self.sFr:
                 self.sFr.disable()

@@ -78,25 +78,6 @@ class QgsRelationSelector(QObject):
         self.mc = self.iface.mapCanvas()
         self.disabled = False
 
-    def enable(self):
-        if len(self.relations) == 0:
-            self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
-            return False
-        self.connectChildRelations()
-        self.manager.changed.connect(self.relationsChanged)
-        self.disabled = False
-        return True
-
-    def disable(self):
-        if not self.disabled:
-            self.disconnectRelations()
-            self.manager.changed.disconnect(self.relationsChanged)
-            self.disabled = True
-            self.parent.buttonToggled.emit(False)
-
-    def clear(self):
-        self.manager.clear()
-
     @property
     def selectChildFromParent(self):
         return self.childFromParentSelection
@@ -104,8 +85,6 @@ class QgsRelationSelector(QObject):
     @selectChildFromParent.setter
     def selectChildFromParent(self, value):
         self.childFromParentSelection = value
-        if len(self.relations) != 0:
-            self.connectParentRelations()
 
     @property
     def activeParentLayer(self):
@@ -123,11 +102,34 @@ class QgsRelationSelector(QObject):
     def zoomParentFeature(self, value):
         self.zoomToReferencedLayerSelection = value
 
+    def enable(self):
+        if len(self.relations) == 0:
+            self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
+            return False
+        self.connectChildRelations()
+        if self.childFromParentSelection:
+            self.connectParentRelations()
+        self.manager.changed.connect(self.relationsChanged)
+        self.disabled = False
+        return True
+
+    def disable(self):
+        if not self.disabled:
+            self.disconnectRelations()
+            self.manager.changed.disconnect(self.relationsChanged)
+            self.disabled = True
+            self.parent.buttonToggled.emit(False)
+
+    def clear(self):
+        self.manager.clear()
+
     def setRelations(self, relations):
         if set(relations) == set(self.relationsBuffer.keys()):
             self.disconnectRelations()
             self.relations = self.manager.relations()
             self.connectChildRelations()
+            if self.childFromParentSelection:
+                self.connectParentRelations()
             return
 
         self.relationsChecked = {} if not relations else self.manager.relations()
@@ -140,6 +142,8 @@ class QgsRelationSelector(QObject):
 
         self.relations = self.relationsChecked
         self.connectChildRelations()
+        if self.childFromParentSelection:
+            self.connectParentRelations()
 
     def relationsChanged(self):
         # self.iface.messageBar().pushMessage('changed', 0)
