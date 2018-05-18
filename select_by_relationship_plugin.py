@@ -241,7 +241,8 @@ class SelectByRelationship(QObject):
         rsettings.show()
         rsettings.raise_()
 
-    def debug_trace(self):
+    @staticmethod
+    def debug_trace():
         """Set a tracepoint in the Python debugger that works with Qt"""
 
         from PyQt5.QtCore import pyqtRemoveInputHook
@@ -271,10 +272,10 @@ class CheckableComboBox(QComboBox):
         item = self.model().itemFromIndex(index)
         if item.checkState() == Qt.Checked:
             item.setCheckState(Qt.Unchecked)
-            self._checkedItems -= set((item.text(),))
+            self._checkedItems -= {item.text()}
         else:
             item.setCheckState(Qt.Checked)
-            self._checkedItems |= set((item.text(),))
+            self._checkedItems |= {item.text()}
 
         self._changed = True
 
@@ -289,7 +290,7 @@ class CheckableComboBox(QComboBox):
 
     def setCheckedItems(self, items):
         for i in items:
-            self._checkedItems |= set((i,))
+            self._checkedItems |= {i}
 
     def paintEvent(self, event):
         painter = QStylePainter(self)
@@ -313,7 +314,7 @@ class CheckBoxDelegate(QItemDelegate):
         """ Initialization """
         super(CheckBoxDelegate, self).__init__(parent)
 
-    def createEditor(self, op, idx):
+    def createEditor(self):
         """ Creates the checkbox """
         self.editor = QCheckBox(self)
 
