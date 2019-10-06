@@ -25,6 +25,8 @@ https://www.youtube.com/watch?v=PRDftcPWNg8
 One more videotutorial by Salvatore Fiandaca for testing the macro python code embedded inside selectFromRelations plugin:
 https://www.youtube.com/watch?v=4lXRnsMO-qI
 
+_*The plug-in was cited on MDPI Journal:*_ https://www.mdpi.com/2220-9964/7/2/49/htm
+
 ## Plugin Select by Relationship v3
 
 The plugin allows you to select records through tables based on `one-to-one` or` one-to-many` relationships specified within a QGIS project.
