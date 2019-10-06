@@ -68,8 +68,9 @@ class QgsRelationSelector(QObject):
         self.manager = self.prj.relationManager()
         self.manager.changed.connect(self.relationsChanged)
 
-        self.relations = self.manager.relations()
-        self.relationsBuffer = self.relationsBackup = self.relations
+        self.relations = {}
+        self.relationsBuffer = self.relationsBackup = {}
+        self.relationsChecked = {}
 
         self.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
         self.selectChildFromParent = self.s.value('relate/selectChildFromParent', type=bool)
@@ -103,51 +104,42 @@ class QgsRelationSelector(QObject):
         self.zoomToReferencedLayerSelection = value
 
     def enable(self):
-        if len(self.relations) == 0:
+        if len(self.manager.relations()) == 0:
             self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
             return False
-        self.connectChildRelations()
-        if self.childFromParentSelection:
-            self.connectParentRelations()
-        self.manager.changed.connect(self.relationsChanged)
+        # self.connectChildRelations()
+        # if self.childFromParentSelection:
+        #     self.connectParentRelations()
+        # self.manager.changed.connect(self.relationsChanged)
         self.disabled = False
         return True
 
     def disable(self):
-        if not self.disabled:
-            self.disconnectRelations()
+        self.disconnectRelations()
+        try:
             self.manager.changed.disconnect(self.relationsChanged)
-            self.disabled = True
-            self.parent.buttonToggled.emit(False)
+        except:
+            pass
+        self.disabled = True
+        self.parent.buttonToggled.emit(False)
 
     def clear(self):
         self.manager.clear()
 
     def setRelations(self, relations):
-        if set(relations) == set(self.relationsBuffer.keys()):
-            self.disconnectRelations()
-            self.relations = self.manager.relations()
-            self.connectChildRelations()
-            if self.childFromParentSelection:
-                self.connectParentRelations()
+        self.disconnectRelations()
+        if not relations:
             return
 
-        self.relationsChecked = {} if not relations else self.manager.relations()
+        self.relationsChecked = {rel: self.manager.relations()[rel] for rel in relations}
 
-        self.disconnectRelations()
-        for r in relations:
-            for k in self.relationsBuffer.keys():
-                if r != k:
-                    self.relationsChecked.pop(k, None)
-
-        self.relations = self.relationsChecked
+        self.relations = self.relationsBuffer = self.relationsChecked
         self.connectChildRelations()
         if self.childFromParentSelection:
             self.connectParentRelations()
 
     def relationsChanged(self):
-        # self.iface.messageBar().pushMessage('changed', 0)
-        if len(self.relationsBuffer) >= len(self.relations):
+        if len(self.relationsBuffer) != len(self.relations):
             self.disconnectRelations()
             self.relations = self.manager.relations()
             self.relationsBuffer = self.relations
@@ -176,51 +168,53 @@ class QgsRelationSelector(QObject):
             referencedLayer = rl.referencedLayer()
             referencingLayer = rl.referencingLayer()
             try:
+                referencingLayer.selectionChanged.disconnect(self.selectParentFromChilds)
                 if self.childFromParentSelection:
                     referencedLayer.selectionChanged.disconnect(self.selectChildsFromParent)
-                referencingLayer.selectionChanged.disconnect(self.selectParentFromChilds)
             except:
                 pass
 
     def selectParentFromChilds(self, fids):
         rls = self.manager.referencingRelations(self.sender())
         for rl in rls:
-            referencingLayer = rl.referencingLayer()
-            referencedLayer = rl.referencedLayer()
+            if rl.name() in self.relations.keys():
+                referencingLayer = rl.referencingLayer()
+                referencedLayer = rl.referencedLayer()
 
-            request = QgsFeatureRequest().setFilterFids(fids)
-            it = referencingLayer.getFeatures(request)
-            parentIds = [rl.getReferencedFeature(i).id() for i in it]
+                request = QgsFeatureRequest().setFilterFids(fids)
+                it = referencingLayer.getFeatures(request)
+                parentIds = [rl.getReferencedFeature(i).id() for i in it]
 
-            referencingLayer.blockSignals(True)
-            referencedLayer.selectByIds(parentIds)
-            referencingLayer.blockSignals(False)
+                referencingLayer.blockSignals(True)
+                referencedLayer.selectByIds(parentIds)
+                referencingLayer.blockSignals(False)
 
-            if self.activeReferencedLayerOnSelection:
-                self.iface.setActiveLayer(referencedLayer)
+                if self.activeReferencedLayerOnSelection:
+                    self.iface.setActiveLayer(referencedLayer)
 
-            if self.zoomToReferencedLayerSelection:
-                self.mc.zoomToSelected(referencedLayer)
+                if self.zoomToReferencedLayerSelection:
+                    self.mc.zoomToSelected(referencedLayer)
 
-            referencedLayer.triggerRepaint()
-            referencingLayer.triggerRepaint()
+                # referencedLayer.triggerRepaint()
+                # referencingLayer.triggerRepaint()
 
     def selectChildsFromParent(self, fids):
         rls = self.manager.referencedRelations(self.sender())
         for rl in rls:
-            referencingLayer = rl.referencingLayer()
-            referencedLayer = rl.referencedLayer()
+            if rl.name() in self.relations.keys():
+                referencingLayer = rl.referencingLayer()
+                referencedLayer = rl.referencedLayer()
 
-            request = QgsFeatureRequest().setFilterFids(fids)
-            fit = referencedLayer.getFeatures(request)
-            childIds = []
-            for f in fit:
-                it = rl.getRelatedFeatures(f)
-                childIds.extend([i.id() for i in it])
+                request = QgsFeatureRequest().setFilterFids(fids)
+                fit = referencedLayer.getFeatures(request)
+                childIds = []
+                for f in fit:
+                    it = rl.getRelatedFeatures(f)
+                    childIds.extend([i.id() for i in it])
 
-            referencedLayer.blockSignals(True)
-            referencingLayer.selectByIds(childIds)
-            referencedLayer.blockSignals(False)
+                referencedLayer.blockSignals(True)
+                referencingLayer.selectByIds(childIds)
+                referencedLayer.blockSignals(False)
 
-            referencedLayer.triggerRepaint()
-            referencingLayer.triggerRepaint()
+                # referencedLayer.triggerRepaint()
+                # referencingLayer.triggerRepaint()

@@ -184,6 +184,19 @@ class SelectByRelationship(QObject):
             self.iface.removeToolBarIcon(action)
         # remove the toolbar
         del self.toolbar
+        if self.sFr:
+            self.sFr.disable()
+            del self.sFr
+
+    def populateComboRelations(self):
+        self.comboRelations.clear()
+        relations = self.sFr.manager.relations().keys()
+        icon = QgsApplication.getThemeIcon('relation.svg')
+        for i, relation in enumerate(relations):
+            self.comboRelations.addItem(icon, relation)
+            item = self.comboRelations.model().item(i, 0)
+            item.setCheckState(Qt.Checked if relation in self.sFr.relationsChecked.keys() else Qt.Unchecked)
+            self.comboRelations.setCheckedItems([])
 
     @pyqtSlot(bool)
     def toggleButton(self, toggled):
@@ -197,26 +210,21 @@ class SelectByRelationship(QObject):
                         item.setCheckState(Qt.Checked)
 
             else:
-                self.comboRelations.clear()
-                relations = self.sFr.relations.keys()
-                icon = QgsApplication.getThemeIcon('relation.svg')
-                for i, relation in enumerate(relations):
-                    self.comboRelations.addItem(icon, relation)
-                    item = self.comboRelations.model().item(i, 0)
-                    item.setCheckState(Qt.Unchecked)
-                    self.comboRelations.setCheckedItems([])
+                self.populateComboRelations()
 
     def updateSettings(self):
         s = QgsSettings()
         self.sFr.zoomParentFeature = s.value('relate/zoomParentFeature', type=bool)
         self.sFr.selectChildFromParent = s.value('relate/selectChildFromParent', type=bool)
         self.sFr.activeParentLayer = s.value('relate/activeParentLayer', type=bool)
+        self.updateRelations()
 
     def run(self, toggle):
         """Run method that performs all the real work"""
         # self.debug_trace()
         if toggle:
             self.sFr = QgsRelationSelector(self)
+            self.sFr.manager.changed.connect(self.populateComboRelations)
             ok = self.sFr.enable()
             self.actionSettings.setEnabled(ok)
             self.buttonToggled.emit(ok)
