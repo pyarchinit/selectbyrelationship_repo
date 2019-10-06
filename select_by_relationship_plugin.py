@@ -51,6 +51,8 @@ class SelectByRelationship(QObject):
         self.iface = iface
         self.sFr = None
 
+        self.iface.newProjectCreated.connect(self.resetRelation)
+
         self.actions = []
         self.menu = self.tr(u'&Select by relationship')
         self.toolbar = self.iface.addToolBar(u'SelectByRelationship')
@@ -187,6 +189,12 @@ class SelectByRelationship(QObject):
         if self.sFr:
             self.sFr.disable()
             del self.sFr
+
+    def resetRelation(self):
+        if self.sFr:
+            self.sFr.relationsChecked = {}
+        self.comboRelations._checkedItems = set()
+        self.comboRelations.setCheckedItems(set())
 
     def populateComboRelations(self):
         self.comboRelations.clear()
