@@ -177,7 +177,7 @@ class QgsRelationSelector(QObject):
     def selectParentFromChilds(self, fids):
         rls = self.manager.referencingRelations(self.sender())
         for rl in rls:
-            if rl.name() in self.relations.keys():
+            if rl.id() in self.relations.keys():
                 referencingLayer = rl.referencingLayer()
                 referencedLayer = rl.referencedLayer()
 
@@ -201,7 +201,7 @@ class QgsRelationSelector(QObject):
     def selectChildsFromParent(self, fids):
         rls = self.manager.referencedRelations(self.sender())
         for rl in rls:
-            if rl.name() in self.relations.keys():
+            if rl.id() in self.relations.keys():
                 referencingLayer = rl.referencingLayer()
                 referencedLayer = rl.referencedLayer()
 
