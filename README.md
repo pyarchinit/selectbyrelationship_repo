@@ -1,7 +1,6 @@
 # ![logo](images/icon.png) Select by Relationship
 [![GitHub release](https://img.shields.io/github/release/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
 [![GitHub repo size in bytes](https://img.shields.io/github/repo-size/pyarchinit/selectbyrelationship_repo.svg?style=flat-square)](https://github.com/pyarchinit/selectbyrelationship_repo)
-[![HitCount](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo.svg)](http://hits.dwyl.io/pyarchinit/selectbyrelationship_repo)
 [![Donate to QGIS](https://img.shields.io/badge/donate%20to-QGIS-green.svg?style=flat-square)](http://qgis.org/en/site/getinvolved/donations.html)
 
 
