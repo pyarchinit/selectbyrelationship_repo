@@ -233,6 +233,14 @@ class SelectByRelationship(QObject):
     def run(self, toggle):
         """Run method that performs all the real work"""
         if toggle:
+            # Tear down any previous selector so it can't stay connected to
+            # the layers and amplify selection signals.
+            if self.sFr:
+                try:
+                    self.sFr.manager.changed.disconnect(self.populateComboRelations)
+                except (TypeError, RuntimeError):
+                    pass
+                self.sFr.disable()
             self.sFr = QgsRelationSelector(self)
             self.sFr.manager.changed.connect(self.populateComboRelations)
             ok = self.sFr.enable()

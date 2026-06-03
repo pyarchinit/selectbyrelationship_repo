@@ -194,7 +194,14 @@ class QgsRelationSelector(QObject):
             for lid, layer in layers.items():
                 if layer is origin:
                     continue
-                layer.selectByIds(list(selection.get(lid, set())))
+                target = selection.get(lid, set())
+                # Idempotent: only touch a layer whose selection actually
+                # changes. This stops the cascade from re-emitting redundant
+                # selectionChanged signals and makes it converge to a fixed
+                # point, so it cannot loop or thrash even if something
+                # re-triggers us (e.g. a stale selector still connected).
+                if set(layer.selectedFeatureIds()) != target:
+                    layer.selectByIds(list(target))
             self._applyZoomAndActivate(origin, selection)
         finally:
             self._propagating = False
