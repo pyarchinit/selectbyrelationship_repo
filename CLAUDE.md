@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A QGIS desktop plugin ("Select by relationship", category Database, `qgisMinimumVersion=3.16`). On a single button click it cascades feature selections across vector layers that are tied together by **relations defined in the QGIS project** (one-to-one or one-to-many). Selecting child rows selects the parent feature(s); optionally selecting parent features selects the related children.
 
-There is no build, test, or lint tooling — the repo *is* the deployable plugin. QGIS loads it directly.
+There is no build or lint tooling — the repo *is* the deployable plugin. QGIS loads it directly. Unit tests for the GUI-free engine live in [tests/](tests/) and run inside the QGIS Python environment (see [tests/README.md](tests/README.md)).
 
 ## Running / developing
 
@@ -14,7 +14,7 @@ There is no build, test, or lint tooling — the repo *is* the deployable plugin
   - Linux: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/`
   - The plugin appears in the QGIS **Database** menu and adds a 3-widget toolbar.
 - After editing code, reload via the *Plugin Reloader* plugin or restart QGIS. There is no hot reload.
-- All testing is manual inside QGIS: load layers, define relations in **Project ▸ Properties ▸ Relations**, then toggle the plugin and pick relations from the combo box.
+- Manual testing inside QGIS: load layers, define relations in **Project ▸ Properties ▸ Relations**, then toggle the plugin and pick relations from the combo box. Automated engine tests: `python3 -m unittest tests.test_relation_selector -v` (run with the QGIS Python; on WSL+OSGeo4W use `python-qgis-ltr.bat`, see [tests/README.md](tests/README.md)).
 - Bump `version=` in [metadata.txt](metadata.txt) for releases; `experimental=True` is currently set there.
 
 ## Architecture

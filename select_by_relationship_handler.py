@@ -26,8 +26,8 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 __revision__ = '$Format:%H$'
 
 
-from qgis.core import QgsFeatureRequest, QgsProject, QgsSettings
-from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, QObject
+from qgis.core import Qgis, QgsFeatureRequest, QgsProject, QgsSettings
+from qgis.PyQt.QtCore import QObject
 
 
 class QgsRelationSelector(QObject):
@@ -69,7 +69,7 @@ class QgsRelationSelector(QObject):
         self.manager.changed.connect(self.relationsChanged)
 
         self.relations = {}
-        self.relationsBuffer = self.relationsBackup = {}
+        self.relationsBuffer = {}
         self.relationsChecked = {}
 
         self.zoomParentFeature = self.s.value('relate/zoomParentFeature', type=bool)
@@ -105,12 +105,9 @@ class QgsRelationSelector(QObject):
 
     def enable(self):
         if len(self.manager.relations()) == 0:
-            self.iface.messageBar().pushMessage("No relationship set in Project properties", 1)
+            self.iface.messageBar().pushMessage(
+                "No relationship set in Project properties", Qgis.MessageLevel.Warning)
             return False
-        # self.connectChildRelations()
-        # if self.childFromParentSelection:
-        #     self.connectParentRelations()
-        # self.manager.changed.connect(self.relationsChanged)
         self.disabled = False
         return True
 
@@ -118,13 +115,14 @@ class QgsRelationSelector(QObject):
         self.disconnectRelations()
         try:
             self.manager.changed.disconnect(self.relationsChanged)
-        except:
+        except (TypeError, RuntimeError):
+            pass
+        try:
+            self.prj.layersWillBeRemoved.disconnect(self.disable)
+        except (TypeError, RuntimeError):
             pass
         self.disabled = True
         self.parent.buttonToggled.emit(False)
-
-    def clear(self):
-        self.manager.clear()
 
     def setRelations(self, relations):
         self.disconnectRelations()
@@ -155,7 +153,7 @@ class QgsRelationSelector(QObject):
             else:
                 try:
                     referencedLayer.selectionChanged.disconnect(self.selectChildsFromParent)
-                except:
+                except (TypeError, RuntimeError):
                     pass
 
     def connectChildRelations(self):
@@ -171,7 +169,7 @@ class QgsRelationSelector(QObject):
                 referencingLayer.selectionChanged.disconnect(self.selectParentFromChilds)
                 if self.childFromParentSelection:
                     referencedLayer.selectionChanged.disconnect(self.selectChildsFromParent)
-            except:
+            except (TypeError, RuntimeError):
                 pass
 
     def selectParentFromChilds(self, fids):
@@ -195,9 +193,6 @@ class QgsRelationSelector(QObject):
                 if self.zoomToReferencedLayerSelection:
                     self.mc.zoomToSelected(referencedLayer)
 
-                # referencedLayer.triggerRepaint()
-                # referencingLayer.triggerRepaint()
-
     def selectChildsFromParent(self, fids):
         rls = self.manager.referencedRelations(self.sender())
         for rl in rls:
@@ -215,6 +210,3 @@ class QgsRelationSelector(QObject):
                 referencedLayer.blockSignals(True)
                 referencingLayer.selectByIds(childIds)
                 referencedLayer.blockSignals(False)
-
-                # referencedLayer.triggerRepaint()
-                # referencingLayer.triggerRepaint()

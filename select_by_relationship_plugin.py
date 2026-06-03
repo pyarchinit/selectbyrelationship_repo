@@ -27,7 +27,7 @@ import os.path
 from qgis.PyQt.QtCore import pyqtSlot, pyqtSignal, QObject, Qt
 from qgis.PyQt.QtGui import QIcon, QStandardItemModel, QPalette
 from qgis.PyQt.QtWidgets import QAction, QComboBox, QItemDelegate, QStylePainter, QStyle, QStyleOptionComboBox, \
-    QSizePolicy, QHBoxLayout, QWidget
+    QHBoxLayout, QWidget
 from qgis.core import QgsSettings, QgsApplication, QgsVectorLayer
 
 from .select_by_relationship_handler import QgsRelationSelector
@@ -198,13 +198,16 @@ class SelectByRelationship(QObject):
 
     def populateComboRelations(self):
         self.comboRelations.clear()
+        self.comboRelations._checkedItems = set()
         relations = self.sFr.manager.relations().keys()
         icon = QgsApplication.getThemeIcon('relation.svg')
         for i, relation in enumerate(relations):
             self.comboRelations.addItem(icon, relation)
             item = self.comboRelations.model().item(i, 0)
-            item.setCheckState(Qt.CheckState.Checked if relation in self.sFr.relationsChecked.keys() else Qt.CheckState.Unchecked)
-            self.comboRelations.setCheckedItems([])
+            checked = relation in self.sFr.relationsChecked.keys()
+            item.setCheckState(Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked)
+            if checked:
+                self.comboRelations._checkedItems.add(relation)
 
     @pyqtSlot(bool)
     def toggleButton(self, toggled):
@@ -229,7 +232,6 @@ class SelectByRelationship(QObject):
 
     def run(self, toggle):
         """Run method that performs all the real work"""
-        # self.debug_trace()
         if toggle:
             self.sFr = QgsRelationSelector(self)
             self.sFr.manager.changed.connect(self.populateComboRelations)
@@ -239,6 +241,10 @@ class SelectByRelationship(QObject):
             self.updateSettings()
         else:
             if self.sFr:
+                try:
+                    self.sFr.manager.changed.disconnect(self.populateComboRelations)
+                except (TypeError, RuntimeError):
+                    pass
                 self.sFr.disable()
                 self.deselectALL()
                 self.actionSettings.setEnabled(False)
@@ -256,15 +262,6 @@ class SelectByRelationship(QObject):
         rsettings = SettingsDialog(self, self.iface.mainWindow())
         rsettings.show()
         rsettings.raise_()
-
-    @staticmethod
-    def debug_trace():
-        """Set a tracepoint in the Python debugger that works with Qt"""
-
-        from PyQt5.QtCore import pyqtRemoveInputHook
-        from pdb import set_trace
-        pyqtRemoveInputHook()
-        set_trace()
 
     def updateRelations(self):
         if self.sFr and not self.sFr.disabled:
@@ -329,8 +326,4 @@ class CheckBoxDelegate(QItemDelegate):
     def __init__(self, parent=None):
         """ Initialization """
         super(CheckBoxDelegate, self).__init__(parent)
-
-    def createEditor(self):
-        """ Creates the checkbox """
-        self.editor = QCheckBox(self)
 
