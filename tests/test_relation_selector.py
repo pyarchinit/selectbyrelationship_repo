@@ -192,5 +192,139 @@ class TestQgsRelationSelector(unittest.TestCase):
         self.assertEqual(self._fk_of_selected_children(), [])
 
 
+def _make_relation(rel_id, referencing_layer, referenced_layer,
+                   referencing_field, referenced_field):
+    rel = QgsRelation()
+    rel.setId(rel_id)
+    rel.setName(rel_id)
+    rel.setReferencingLayer(referencing_layer.id())
+    rel.setReferencedLayer(referenced_layer.id())
+    rel.addFieldPair(referencing_field, referenced_field)
+    assert rel.isValid(), "invalid relation: {}".format(rel_id)
+    return rel
+
+
+class TestMultiLevelCascade(unittest.TestCase):
+    """Three-level chain  GP <- P <- C  cascading in both directions."""
+
+    def setUp(self):
+        self.iface = get_iface()
+        self.project = QgsProject.instance()
+        self.project.clear()
+
+        self.gp = _make_layer("None?field=pk:integer", "grandparent")
+        for pk in (100, 200):
+            _add_feature(self.gp, [pk])
+
+        self.p = _make_layer(
+            "None?field=pk:integer&field=gp_fk:integer", "parent")
+        for pk, gp_fk in ((10, 100), (20, 100), (30, 200)):
+            _add_feature(self.p, [pk, gp_fk])
+
+        self.c = _make_layer(
+            "None?field=cid:integer&field=p_fk:integer", "child")
+        for cid, p_fk in ((1, 10), (2, 20), (3, 30)):
+            _add_feature(self.c, [cid, p_fk])
+
+        self.project.addMapLayers([self.gp, self.p, self.c])
+        self.project.relationManager().addRelation(
+            _make_relation("rel_pc", self.c, self.p, "p_fk", "pk"))
+        self.project.relationManager().addRelation(
+            _make_relation("rel_gp", self.p, self.gp, "gp_fk", "pk"))
+
+        self.selector = QgsRelationSelector(FakeParent(self.iface))
+
+    def tearDown(self):
+        self.selector.disable()
+        self.project.clear()
+
+    def _fids(self, layer, field, value):
+        return [f.id() for f in layer.getFeatures() if f[field] == value]
+
+    def _vals(self, layer, field):
+        return sorted(f[field] for f in layer.selectedFeatures())
+
+    def test_child_cascades_up_two_levels(self):
+        self.selector.enable()
+        self.selector.setRelations(["rel_pc", "rel_gp"])
+
+        self.c.selectByIds(self._fids(self.c, "cid", 1))  # p_fk=10
+
+        self.assertEqual(self._vals(self.p, "pk"), [10])
+        self.assertEqual(self._vals(self.gp, "pk"), [100])
+
+    def test_parent_cascades_down_two_levels(self):
+        self.selector.selectChildFromParent = True
+        self.selector.enable()
+        self.selector.setRelations(["rel_pc", "rel_gp"])
+
+        self.gp.selectByIds(self._fids(self.gp, "pk", 100))
+
+        self.assertEqual(self._vals(self.p, "pk"), [10, 20])
+        self.assertEqual(self._vals(self.c, "cid"), [1, 2])
+
+
+class TestManyToMany(unittest.TestCase):
+    """Many-to-many  A <- L -> B  through a link/pivot table."""
+
+    def setUp(self):
+        self.iface = get_iface()
+        self.project = QgsProject.instance()
+        self.project.clear()
+
+        self.a = _make_layer("None?field=pk:integer", "a")
+        for pk in (1, 2):
+            _add_feature(self.a, [pk])
+
+        self.b = _make_layer("None?field=pk:integer", "b")
+        for pk in (10, 20):
+            _add_feature(self.b, [pk])
+
+        self.link = _make_layer(
+            "None?field=a_fk:integer&field=b_fk:integer", "link")
+        for a_fk, b_fk in ((1, 10), (1, 20), (2, 20)):
+            _add_feature(self.link, [a_fk, b_fk])
+
+        self.project.addMapLayers([self.a, self.b, self.link])
+        self.project.relationManager().addRelation(
+            _make_relation("rel_la", self.link, self.a, "a_fk", "pk"))
+        self.project.relationManager().addRelation(
+            _make_relation("rel_lb", self.link, self.b, "b_fk", "pk"))
+
+        self.selector = QgsRelationSelector(FakeParent(self.iface))
+
+    def tearDown(self):
+        self.selector.disable()
+        self.project.clear()
+
+    def _fids(self, layer, field, value):
+        return [f.id() for f in layer.getFeatures() if f[field] == value]
+
+    def _vals(self, layer, field):
+        return sorted(f[field] for f in layer.selectedFeatures())
+
+    def test_select_b_from_a_via_link_table(self):
+        self.selector.selectChildFromParent = True
+        self.selector.enable()
+        self.selector.setRelations(["rel_la", "rel_lb"])
+
+        # A pk=1 is linked (via L) to B pk=10 and pk=20
+        self.a.selectByIds(self._fids(self.a, "pk", 1))
+
+        self.assertEqual(self._vals(self.b, "pk"), [10, 20])
+        # the origin keeps exactly the user selection
+        self.assertEqual(self._vals(self.a, "pk"), [1])
+
+    def test_select_b_from_a_single_link(self):
+        self.selector.selectChildFromParent = True
+        self.selector.enable()
+        self.selector.setRelations(["rel_la", "rel_lb"])
+
+        # A pk=2 is linked only to B pk=20
+        self.a.selectByIds(self._fids(self.a, "pk", 2))
+
+        self.assertEqual(self._vals(self.b, "pk"), [20])
+
+
 if __name__ == "__main__":
     unittest.main()

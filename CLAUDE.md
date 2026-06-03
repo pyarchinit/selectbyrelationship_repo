@@ -22,16 +22,17 @@ There is no build or lint tooling — the repo *is* the deployable plugin. QGIS 
 Three modules, loaded via [`__init__.py`](__init__.py)'s `classFactory` (QGIS entry point):
 
 - [select_by_relationship_plugin.py](select_by_relationship_plugin.py) — `SelectByRelationship`, the GUI/controller. Builds the toolbar (toggle action, a custom `CheckableComboBox` of relation IDs, settings action), wires QGIS signals, and owns the lifecycle (`initGui`/`unload`/`run`). Toggling the main action constructs a fresh `QgsRelationSelector` each time. `CheckableComboBox` + `CheckBoxDelegate` are custom Qt widgets enabling multi-select of relations with a "N relationship(s) selected" label.
-- [select_by_relationship_handler.py](select_by_relationship_handler.py) — `QgsRelationSelector`, the engine. Holds **no GUI**. It connects to `selectionChanged` on the relation's referencing (child) and referenced (parent) layers and propagates selections:
-  - `selectParentFromChilds` — child selection → select referenced parent features (always active when enabled).
-  - `selectChildsFromParent` — parent selection → select referencing child features (only when `selectChildFromParent` setting is on).
-  - Uses `blockSignals` to prevent feedback loops between the two directions.
+- [select_by_relationship_handler.py](select_by_relationship_handler.py) — `QgsRelationSelector`, the engine. Holds **no GUI**. It connects `selectionChanged` of every layer participating in the active relations to a single slot, `propagateSelection`, which cascades the selection across the **whole graph** of active relations:
+  - child → parent is always followed; parent → child only when `selectChildFromParent` is on.
+  - `_computeClosure` does a breadth-first traversal expanding each layer at most once (accumulating ids as a union). This is **multi-level/transitive** (e.g. `site ← context ← find`) and handles **many-to-many** relations modelled as two 1:N relations through a link/pivot table (`A ← link → B`). Expanding once guarantees termination on cyclic/diamond graphs and avoids the connected-component over-selection a full fixpoint would cause.
+  - Re-entrancy is prevented by the `_propagating` flag (no `blockSignals`), so the canvas and attribute tables still receive `selectionChanged` and refresh.
+  - `_applyZoomAndActivate` preserves the original single-hop zoom/activate-parent behaviour for the directly referenced layer of the origin.
 - [select_by_relationship_settings.py](select_by_relationship_settings.py) — `SettingsDialog`, a `QDialog` loaded from [settings.ui](settings.ui) via `loadUiType`. Three checkboxes persisted in `QgsSettings` under the `relate/` prefix: `zoomParentFeature`, `selectChildFromParent`, `activeParentLayer`.
 
 ### Key flow & state
 
 - Settings live in `QgsSettings` (`relate/...`). The dialog writes them on `accept()`, then calls `plugin.updateSettings()`, which copies them onto the live `QgsRelationSelector` and re-applies relations.
-- The selector tracks which relations are active in `relations` / `relationsChecked`, keyed by QGIS relation ID. `setRelations()` (driven by the combo box checkboxes) disconnects everything, then reconnects only the chosen relations.
+- The selector tracks which relations are active in `relations` / `relationsChecked`, keyed by QGIS relation ID. `setRelations()` (driven by the combo box checkboxes) disconnects everything, then reconnects `propagateSelection` to the layers of the chosen relations (`connectRelations`/`disconnectRelations` work on `participatingLayers()`).
 - `relationManager().changed` (relations added/removed in the project) repopulates the combo box; `newProjectCreated` and `layersWillBeRemoved` reset/disable to avoid dangling connections.
 - The plugin↔selector boundary uses the `buttonToggled(bool)` Qt signal so the engine can force the UI button off (e.g. when no relations exist).
 

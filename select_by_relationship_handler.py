@@ -26,6 +26,8 @@ __copyright__ = '(C) 2017 by Salvatore Larosa'
 __revision__ = '$Format:%H$'
 
 
+from collections import deque
+
 from qgis.core import Qgis, QgsFeatureRequest, QgsProject, QgsSettings
 from qgis.PyQt.QtCore import QObject
 
@@ -78,6 +80,10 @@ class QgsRelationSelector(QObject):
 
         self.mc = self.iface.mapCanvas()
         self.disabled = False
+        # Guard against signal re-entrancy while we propagate a selection
+        # across the relation graph (our own selectByIds calls re-emit
+        # selectionChanged synchronously).
+        self._propagating = False
 
     @property
     def selectChildFromParent(self):
@@ -127,86 +133,153 @@ class QgsRelationSelector(QObject):
     def setRelations(self, relations):
         self.disconnectRelations()
         if not relations:
+            self.relations = self.relationsBuffer = {}
+            self.relationsChecked = {}
             return
 
         self.relationsChecked = {rel: self.manager.relations()[rel] for rel in relations}
 
         self.relations = self.relationsBuffer = self.relationsChecked
-        self.connectChildRelations()
-        if self.childFromParentSelection:
-            self.connectParentRelations()
+        self.connectRelations()
 
     def relationsChanged(self):
         if len(self.relationsBuffer) != len(self.relations):
             self.disconnectRelations()
             self.relations = self.manager.relations()
             self.relationsBuffer = self.relations
-        self.connectChildRelations()
-        if self.childFromParentSelection:
-            self.connectParentRelations()
+        else:
+            self.disconnectRelations()
+        self.connectRelations()
 
-    def connectParentRelations(self):
-        for _, rl in self.relations.items():
-            referencedLayer = rl.referencedLayer()
-            if self.childFromParentSelection:
-                referencedLayer.selectionChanged.connect(self.selectChildsFromParent)
-            else:
-                try:
-                    referencedLayer.selectionChanged.disconnect(self.selectChildsFromParent)
-                except (TypeError, RuntimeError):
-                    pass
+    def participatingLayers(self):
+        """All distinct layers touched by the active relations, keyed by id."""
+        layers = {}
+        for rl in self.relations.values():
+            for layer in (rl.referencingLayer(), rl.referencedLayer()):
+                if layer is not None:
+                    layers[layer.id()] = layer
+        return layers
 
-    def connectChildRelations(self):
-        for _, rl in self.relations.items():
-            referencingLayer = rl.referencingLayer()
-            referencingLayer.selectionChanged.connect(self.selectParentFromChilds)
+    def connectRelations(self):
+        for layer in self.participatingLayers().values():
+            # Disconnect first to avoid duplicate connections (which would
+            # otherwise fire propagateSelection more than once per change).
+            try:
+                layer.selectionChanged.disconnect(self.propagateSelection)
+            except (TypeError, RuntimeError):
+                pass
+            layer.selectionChanged.connect(self.propagateSelection)
 
     def disconnectRelations(self):
-        for _, rl in self.relations.items():
-            referencedLayer = rl.referencedLayer()
-            referencingLayer = rl.referencingLayer()
+        for layer in self.participatingLayers().values():
             try:
-                referencingLayer.selectionChanged.disconnect(self.selectParentFromChilds)
-                if self.childFromParentSelection:
-                    referencedLayer.selectionChanged.disconnect(self.selectChildsFromParent)
+                layer.selectionChanged.disconnect(self.propagateSelection)
             except (TypeError, RuntimeError):
                 pass
 
-    def selectParentFromChilds(self, fids):
-        rls = self.manager.referencingRelations(self.sender())
-        for rl in rls:
-            if rl.id() in self.relations.keys():
-                referencingLayer = rl.referencingLayer()
-                referencedLayer = rl.referencedLayer()
+    def propagateSelection(self, *args):
+        """Cascade the selection of the sender layer across the whole graph
+        of active relations (multi-level, and bidirectional when
+        ``selectChildFromParent`` is on)."""
+        if self._propagating:
+            return
+        origin = self.sender()
+        if origin is None or not self.relations:
+            return
 
-                request = QgsFeatureRequest().setFilterFids(fids)
-                it = referencingLayer.getFeatures(request)
-                parentIds = [rl.getReferencedFeature(i).id() for i in it]
+        self._propagating = True
+        try:
+            layers = self.participatingLayers()
+            selection = self._computeClosure(origin, layers)
+            for lid, layer in layers.items():
+                if layer is origin:
+                    continue
+                layer.selectByIds(list(selection.get(lid, set())))
+            self._applyZoomAndActivate(origin, selection)
+        finally:
+            self._propagating = False
 
-                referencingLayer.blockSignals(True)
-                referencedLayer.selectByIds(parentIds)
-                referencingLayer.blockSignals(False)
+    def _computeClosure(self, origin, layers):
+        """Breadth-first traversal of the relation graph.
 
+        Each layer is *expanded* (used to derive further selections) at most
+        once, so the traversal always terminates even on cyclic relation
+        graphs and many-to-many setups (parent ─ link table ─ parent). Ids
+        are accumulated as a union, which keeps diamond topologies correct.
+        """
+        selection = {origin.id(): set(origin.selectedFeatureIds())}
+        queue = deque([origin])
+        expanded = set()
+
+        while queue:
+            layer = queue.popleft()
+            lid = layer.id()
+            if lid in expanded:
+                continue
+            expanded.add(lid)
+            ids = selection.get(lid, set())
+            if not ids:
+                continue
+
+            for rl in self.relations.values():
+                child = rl.referencingLayer()
+                parent = rl.referencedLayer()
+                if child is None or parent is None:
+                    continue
+                # child -> parent (always)
+                if child.id() == lid:
+                    self._merge(selection, parent,
+                                self._parentIds(rl, child, ids),
+                                queue, expanded, layers)
+                # parent -> child (opt-in)
+                if self.childFromParentSelection and parent.id() == lid:
+                    self._merge(selection, child,
+                                self._childIds(rl, parent, ids),
+                                queue, expanded, layers)
+        return selection
+
+    @staticmethod
+    def _merge(selection, layer, derived, queue, expanded, layers):
+        if not derived:
+            return
+        lid = layer.id()
+        selection.setdefault(lid, set()).update(derived)
+        layers.setdefault(lid, layer)
+        if lid not in expanded:
+            queue.append(layer)
+
+    @staticmethod
+    def _parentIds(relation, child_layer, ids):
+        request = QgsFeatureRequest().setFilterFids(list(ids))
+        result = set()
+        for feature in child_layer.getFeatures(request):
+            referenced = relation.getReferencedFeature(feature)
+            if referenced.isValid():
+                result.add(referenced.id())
+        return result
+
+    @staticmethod
+    def _childIds(relation, parent_layer, ids):
+        request = QgsFeatureRequest().setFilterFids(list(ids))
+        result = set()
+        for feature in parent_layer.getFeatures(request):
+            for related in relation.getRelatedFeatures(feature):
+                result.add(related.id())
+        return result
+
+    def _applyZoomAndActivate(self, origin, selection):
+        """Preserve the original single-hop behaviour: when a child layer is
+        the origin of the selection, optionally activate and/or zoom to its
+        directly referenced (parent) layer."""
+        if not (self.zoomToReferencedLayerSelection
+                or self.activeReferencedLayerOnSelection):
+            return
+        for rl in self.relations.values():
+            if rl.referencingLayer() is origin:
+                referenced = rl.referencedLayer()
+                if referenced is None or not selection.get(referenced.id()):
+                    continue
                 if self.activeReferencedLayerOnSelection:
-                    self.iface.setActiveLayer(referencedLayer)
-
+                    self.iface.setActiveLayer(referenced)
                 if self.zoomToReferencedLayerSelection:
-                    self.mc.zoomToSelected(referencedLayer)
-
-    def selectChildsFromParent(self, fids):
-        rls = self.manager.referencedRelations(self.sender())
-        for rl in rls:
-            if rl.id() in self.relations.keys():
-                referencingLayer = rl.referencingLayer()
-                referencedLayer = rl.referencedLayer()
-
-                request = QgsFeatureRequest().setFilterFids(fids)
-                fit = referencedLayer.getFeatures(request)
-                childIds = []
-                for f in fit:
-                    it = rl.getRelatedFeatures(f)
-                    childIds.extend([i.id() for i in it])
-
-                referencedLayer.blockSignals(True)
-                referencingLayer.selectByIds(childIds)
-                referencedLayer.blockSignals(False)
+                    self.mc.zoomToSelected(referenced)

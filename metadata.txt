@@ -3,7 +3,7 @@ name=Select by relationship
 qgisMinimumVersion=3.16
 qgisMaximumVersion=4.99
 description=The plugin allows to select records through tables based on relationships one-to-one or one-to-many specified inside a QGIS project.
-version=0.3.4
+version=0.4.0
 author=Luca Mandolesi, Salvatore Larosa
 email=pyarchinit@gmail.com
 
@@ -16,7 +16,8 @@ repository=https://github.com/pyarchinit/selectbyrelationship_repo
 # Recommended items:
 
 # Uncomment the following line and add your changelog:
-changelog=0.3.4 - Compatibilità QGIS 4 / Qt6 (PyQt6); mantiene il supporto a QGIS 3.16+
+changelog=0.4.0 - Selezione a cascata multi-livello (transitiva) lungo le catene di relazioni e supporto alle relazioni molti-a-molti tramite tabella ponte; pulizia del codice e suite di test dell'engine.
+    0.3.4 - Compatibilità QGIS 4 / Qt6 (PyQt6); mantiene il supporto a QGIS 3.16+
 
 # Tags are comma separated with spaces allowed
 tags=select, relationship, database
