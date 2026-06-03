@@ -263,6 +263,21 @@ class TestMultiLevelCascade(unittest.TestCase):
         self.assertEqual(self._vals(self.p, "pk"), [10, 20])
         self.assertEqual(self._vals(self.c, "cid"), [1, 2])
 
+    def test_leaf_selection_does_not_explode_with_bidirectional(self):
+        # Regression: with parent->child ON, selecting a single leaf feature
+        # must NOT drag in its siblings/cousins via the up-then-down path.
+        # That over-selection (here: context pk=20, sibling of pk=10 under
+        # the same site) is what froze the UI on real data.
+        self.selector.selectChildFromParent = True
+        self.selector.enable()
+        self.selector.setRelations(["rel_pc", "rel_gp"])
+
+        self.c.selectByIds(self._fids(self.c, "cid", 1))  # ctx pk=10, site 100
+
+        self.assertEqual(self._vals(self.c, "cid"), [1])    # origin untouched
+        self.assertEqual(self._vals(self.p, "pk"), [10])    # only its context
+        self.assertEqual(self._vals(self.gp, "pk"), [100])  # only its site
+
 
 class TestManyToMany(unittest.TestCase):
     """Many-to-many  A <- L -> B  through a link/pivot table."""

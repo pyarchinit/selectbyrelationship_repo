@@ -207,23 +207,30 @@ class QgsRelationSelector(QObject):
             self._propagating = False
 
     def _computeClosure(self, origin, layers):
-        """Breadth-first traversal of the relation graph.
+        """Breadth-first traversal of the relation graph from ``origin``.
 
-        Each layer is *expanded* (used to derive further selections) at most
-        once, so the traversal always terminates even on cyclic relation
-        graphs and many-to-many setups (parent ─ link table ─ parent). Ids
-        are accumulated as a union, which keeps diamond topologies correct.
+        Each layer is reached **once**: the first time its selection is
+        derived it is fixed and never recomputed or revisited. This:
+
+        * keeps multi-level chains working (find → context → site);
+        * keeps many-to-many through a link table working
+          (``A → link → B``);
+        * crucially, prevents the cascade from "turning around" — e.g. going
+          up a chain to an ancestor and then back down to *all* of its other
+          descendants — which would select huge, unwanted sets and freeze the
+          UI on real data.
+
+        The trade-off is that in graphs where one layer is reachable by
+        several paths carrying *different* features, only the first path
+        contributes; this is rare in practice and vastly preferable to the
+        over-selection above.
         """
         selection = {origin.id(): set(origin.selectedFeatureIds())}
         queue = deque([origin])
-        expanded = set()
 
         while queue:
             layer = queue.popleft()
             lid = layer.id()
-            if lid in expanded:
-                continue
-            expanded.add(lid)
             ids = selection.get(lid, set())
             if not ids:
                 continue
@@ -234,26 +241,25 @@ class QgsRelationSelector(QObject):
                 if child is None or parent is None:
                     continue
                 # child -> parent (always)
-                if child.id() == lid:
-                    self._merge(selection, parent,
+                if child.id() == lid and parent.id() not in selection:
+                    self._visit(selection, parent,
                                 self._parentIds(rl, child, ids),
-                                queue, expanded, layers)
+                                queue, layers)
                 # parent -> child (opt-in)
-                if self.childFromParentSelection and parent.id() == lid:
-                    self._merge(selection, child,
+                if (self.childFromParentSelection and parent.id() == lid
+                        and child.id() not in selection):
+                    self._visit(selection, child,
                                 self._childIds(rl, parent, ids),
-                                queue, expanded, layers)
+                                queue, layers)
         return selection
 
     @staticmethod
-    def _merge(selection, layer, derived, queue, expanded, layers):
+    def _visit(selection, layer, derived, queue, layers):
         if not derived:
             return
-        lid = layer.id()
-        selection.setdefault(lid, set()).update(derived)
-        layers.setdefault(lid, layer)
-        if lid not in expanded:
-            queue.append(layer)
+        selection[layer.id()] = derived
+        layers.setdefault(layer.id(), layer)
+        queue.append(layer)
 
     @staticmethod
     def _parentIds(relation, child_layer, ids):
