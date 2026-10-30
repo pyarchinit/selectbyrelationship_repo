@@ -31,8 +31,6 @@ from qgis.PyQt.QtWidgets import QDialog
 from qgis.PyQt.uic import loadUiType
 from qgis.core import QgsSettings
 
-from .select_by_relationship_handler import QgsRelationSelector
-
 MAIN_DIALOG_CLASS, _ = loadUiType(os.path.abspath(
     os.path.join(os.path.dirname(__file__), 'settings.ui')))
 
@@ -51,15 +49,6 @@ class SettingsDialog(QDialog, MAIN_DIALOG_CLASS):
         self.chkActiveParent.setChecked(self.s.value('relate/activeParentLayer', False, type=bool))
         self.chkZoomParent.setChecked(self.s.value('relate/zoomParentFeature', False, type=bool))
         self.chkSelectParent.setChecked(self.s.value('relate/selectChildFromParent', False, type=bool))
-
-    def setZoomToParent(self, checkstate):
-        if checkstate:
-            enable = True
-        else:
-            enable = False
-
-        print(enable)
-        self.sFr.zoomParentFeature = enable
 
     def accept(self):
         self.s.setValue('relate/activeParentLayer', self.chkActiveParent.isChecked())
